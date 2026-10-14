@@ -23,9 +23,27 @@ def main() -> int:
         Exit status code.
     """
     try:
-        message = greet("42")
-        print(message)
+        from src.config_loader import ConfigError, load_config
+        from sys import argv
+
+        if len(argv) != 2:
+            print(
+                "Error: expected exactly one argument "
+                f"(got {len(argv) - 1})\n"
+                "Usage: python3 pac-man.py <config.json>"
+            )
+            return 1
+
+        try:
+            config = load_config(argv[1])
+        except ConfigError as error:
+            print(f"Error: {error}")
+            return 1
+
+        print(config)
         return 0
+    except KeyboardInterrupt:
+        return 1
     except Exception as error:
         print(f"Error: {error}")
         return 1

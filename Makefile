@@ -1,5 +1,6 @@
 PYTHON = uv run python
 MAIN = -m src
+ARGS =
 
 .PHONY: unzip_maze install run debug clean lint lint-strict test
 
@@ -10,7 +11,7 @@ install:
 	uv sync
 
 run:
-	$(PYTHON) $(MAIN)
+	$(PYTHON) $(MAIN) $(ARGS)
 
 debug:
 	$(PYTHON) -m pdb $(MAIN)
