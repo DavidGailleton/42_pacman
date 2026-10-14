@@ -1,7 +1,10 @@
 PYTHON = uv run python
 MAIN = -m src
 
-.PHONY: install run debug clean lint lint-strict test
+.PHONY: unzip_maze install run debug clean lint lint-strict test
+
+unzip_maze:
+	unzip -o mazegenerator-00001.zip -d lib
 
 install:
 	uv sync
