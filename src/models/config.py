@@ -36,7 +36,6 @@ class Config(BaseModel):
     )
     shape: tuple[MazeSide, MazeSide] = (21, 21)
     lives: StrictInt = Field(default=3, ge=1, le=99)
-    pacgum: StrictInt = Field(default=42, ge=1)
     point_per_pacgum: StrictInt = Field(default=10, ge=0)
     point_per_super_pacgum: StrictInt = Field(default=50, ge=0)
     point_per_ghost: StrictInt = Field(default=200, ge=0)
