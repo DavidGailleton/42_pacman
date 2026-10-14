@@ -1,7 +1,6 @@
 """Main entry point for the project."""
-
-
-from typing import NoReturn
+from mazegenerator import MazeGenerator
+from utils import Maze
 
 
 def greet(name: str) -> str:
@@ -22,13 +21,10 @@ def main() -> int:
     Returns:
         Exit status code.
     """
-    try:
-        message = greet("42")
-        print(message)
-        return 0
-    except Exception as error:
-        print(f"Error: {error}")
-        return 1
+    maze = MazeGenerator()
+    maze.generate()
+    cells = Maze(maze.maze)
+    cells.get_walls((0, 0))
 
 
 if __name__ == "__main__":
