@@ -3,6 +3,21 @@
 from src.game import Game
 
 
+from typing import NoReturn
+
+
+def greet(name: str) -> str:
+    """Return a greeting message.
+
+    Args:
+        name: The name to greet.
+
+    Returns:
+        A formatted greeting string.
+    """
+    return f"Hello, {name}!"
+
+
 def main() -> int:
     """Run the main program.
 
