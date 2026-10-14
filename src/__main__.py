@@ -1,5 +1,7 @@
 """Main entry point for the project."""
 
+from src.game import Game
+
 
 def main() -> int:
     """Run the main program.
@@ -26,6 +28,9 @@ def main() -> int:
             return 1
 
         print(config)
+
+        game = Game()
+
         return 0
     except KeyboardInterrupt:
         return 1
