@@ -1,5 +1,6 @@
 """Main entry point for the project."""
 
+
 from typing import NoReturn
 
 
