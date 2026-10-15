@@ -3,6 +3,8 @@ import pygame
 
 
 MAZE_SCREEN_RATIO = 0.8
+BLACK_COLOR = (0, 0, 0)
+MAZE_COLOR = (33, 33, 222)
 
 
 class MazeRenderer:
@@ -31,13 +33,13 @@ class MazeRenderer:
 
         tmp_y, tmp_x = (start_y, start_x)
         paper = pygame.Surface(self.screen_size)
-        paper.fill((30, 30, 60))
+        paper.fill(BLACK_COLOR)
         for x in range(0, max_x):
             tmp_y = start_y
             for y in range(0, max_y):
                 self._draw_cell(paper, (tmp_y, tmp_x), (x, y))
-                tmp_y += self.cell_size
-            tmp_x += self.cell_size
+                tmp_y += (self.cell_size)
+            tmp_x += (self.cell_size)
 
         return paper
 
@@ -77,22 +79,24 @@ class MazeRenderer:
         if is_close_cell == 4:
             self._fill_cell(paper, offset)
 
-    def _draw_vertical(self, paper: pygame.Surface, offset: tuple[int, int]
-                       ) -> None:
-        start_y, start_x = offset
-        max_y = start_y + self.cell_size
-        for y in range(start_y, max_y):
-            paper.set_at((start_x, y), (255, 0, 0))
-
     def _fill_cell(self, paper: pygame.Surface, offset: tuple[int, int]
                    ) -> None:
         min_y, min_x = offset
         for y in range(min_y, min_y + self.cell_size):
             self._draw_horizental(paper, (y, min_x))
 
+    def _draw_vertical(self, paper: pygame.Surface, offset: tuple[int, int]
+                       ) -> None:
+        start_y, start_x = offset
+        max_y = start_y + self.cell_size
+        for x in range(start_x, start_x + 3):
+            for y in range(start_y, max_y):
+                paper.set_at((x, y), MAZE_COLOR)
+
     def _draw_horizental(self, paper: pygame.Surface, offset: tuple[int, int]
                          ) -> None:
         start_y, start_x = offset
         max_x = start_x + self.cell_size
-        for x in range(start_x, max_x):
-            paper.set_at((x, start_y), (255, 0, 0))
+        for y in range(start_y, start_y + 3):
+            for x in range(start_x, max_x):
+                paper.set_at((x, y), MAZE_COLOR)
