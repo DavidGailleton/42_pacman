@@ -43,7 +43,10 @@ class MazeRenderer:
 
     def _get_offset(self) -> tuple[int, int]:
         w, h = self.screen_size
-        x = int(w * (1 - MAZE_SCREEN_RATIO) / 2)
+        nb_cell, _ = self.maze.get_shape()
+        maze_dist_middle = int(nb_cell * self.cell_size / 2)
+        middle_w = int(w / 2)
+        x = middle_w - maze_dist_middle
         y = int(h * (1 - MAZE_SCREEN_RATIO) / 2)
         return (y, x)
 
@@ -51,20 +54,28 @@ class MazeRenderer:
                    coord: tuple[int, int]) -> None:
         tmp_y, tmp_x = offset
         stock_x = tmp_x
+        is_close_cell = 0
 
         if self.maze.is_west_wall(coord):
             self._draw_vertical(paper, (tmp_y, tmp_x))
+            is_close_cell += 1
 
         if self.maze.is_north_wall(coord):
             self._draw_horizental(paper, (tmp_y, tmp_x))
+            is_close_cell += 1
 
         tmp_x += self.cell_size
         if self.maze.is_east_wall(coord):
             self._draw_vertical(paper, (tmp_y, tmp_x))
+            is_close_cell += 1
 
         tmp_y += self.cell_size
         if self.maze.is_south_wall(coord):
             self._draw_horizental(paper, (tmp_y, stock_x))
+            is_close_cell += 1
+
+        if is_close_cell == 4:
+            self._fill_cell(paper, offset)
 
     def _draw_vertical(self, paper: pygame.Surface, offset: tuple[int, int]
                        ) -> None:
@@ -72,6 +83,12 @@ class MazeRenderer:
         max_y = start_y + self.cell_size
         for y in range(start_y, max_y):
             paper.set_at((start_x, y), (255, 0, 0))
+
+    def _fill_cell(self, paper: pygame.Surface, offset: tuple[int, int]
+                   ) -> None:
+        min_y, min_x = offset
+        for y in range(min_y, min_y + self.cell_size):
+            self._draw_horizental(paper, (y, min_x))
 
     def _draw_horizental(self, paper: pygame.Surface, offset: tuple[int, int]
                          ) -> None:
