@@ -44,7 +44,8 @@ def main() -> int:
 
         print(config)
 
-        game = Game()
+        game = Game(config=config)
+        game.run()
 
         return 0
     except KeyboardInterrupt:
