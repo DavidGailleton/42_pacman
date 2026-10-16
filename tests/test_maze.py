@@ -6,7 +6,8 @@ import pytest
 
 from src.config_loader import load_config
 from src.models.config import Config
-from src.utils.maze import EAST, NORTH, SOUTH, WEST, Maze
+from src.constants import DOWN, EAST, LEFT, NORTH, RIGHT, SOUTH, UP, WEST
+from src.utils.maze import Maze
 
 CONFIG_PATH = Path(__file__).resolve().parent.parent / "config.json"
 
@@ -110,3 +111,23 @@ def test_no_avoidable_dead_ends(maze: Maze) -> None:
 def test_same_seed_gives_same_maze(config: Config) -> None:
     """The fixed seed of the first level always gives the same maze."""
     assert Maze(config).get_maze() == Maze(config).get_maze()
+
+
+def test_can_move_matches_bits(maze: Maze) -> None:
+    """A move is possible exactly when its wall bit is not set."""
+    grid = maze.get_maze()
+    for x, y in all_cells(maze):
+        value = grid[y][x]
+        assert maze.can_move((x, y), UP) == (not value & NORTH)
+        assert maze.can_move((x, y), RIGHT) == (not value & EAST)
+        assert maze.can_move((x, y), DOWN) == (not value & SOUTH)
+        assert maze.can_move((x, y), LEFT) == (not value & WEST)
+
+
+def test_is_closed_matches_bits(maze: Maze) -> None:
+    """A cell is closed exactly when it has all four wall bits."""
+    grid = maze.get_maze()
+    all_walls = NORTH | EAST | SOUTH | WEST
+    for x, y in all_cells(maze):
+        expected = grid[y][x] & all_walls == all_walls
+        assert maze.is_closed((x, y)) == expected

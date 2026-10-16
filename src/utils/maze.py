@@ -1,10 +1,27 @@
 from mazegenerator import MazeGenerator
+from src.constants import (
+    DOWN,
+    EAST,
+    LEFT,
+    NORTH,
+    RIGHT,
+    SOUTH,
+    UP,
+    WEST,
+    Direction,
+)
 from src.models.config import Config
 
-NORTH = 1
-EAST = 2
-SOUTH = 4
-WEST = 8
+# Wall that blocks each move.
+DIRECTION_TO_WALL: dict[Direction, int] = {
+    UP: NORTH,
+    RIGHT: EAST,
+    DOWN: SOUTH,
+    LEFT: WEST,
+}
+
+# A cell with all four walls, e.g. a cell of the "42" pattern.
+ALL_WALLS: int = NORTH | EAST | SOUTH | WEST
 
 
 class Maze:
@@ -53,3 +70,27 @@ class Maze:
         if self.is_east_wall(coord):
             count += 1
         return True if count == 4 else False
+
+    def can_move(self, coord: tuple[int, int], direction: Direction) -> bool:
+        """Tell if there is no wall in a direction from a cell.
+
+        Args:
+            coord: Cell (x, y) to move from.
+            direction: Move to check, as (dx, dy).
+
+        Returns:
+            True if no wall blocks the move.
+        """
+        return not self._has_wall(coord, DIRECTION_TO_WALL[direction])
+
+    def is_closed(self, coord: tuple[int, int]) -> bool:
+        """Tell if a cell has its four walls (nothing can enter it).
+
+        Args:
+            coord: Cell (x, y) to check.
+
+        Returns:
+            True if the cell has all four walls.
+        """
+        x, y = coord
+        return self.get_maze()[y][x] & ALL_WALLS == ALL_WALLS
