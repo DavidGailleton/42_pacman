@@ -59,6 +59,18 @@ class Maze:
     def is_west_wall(self, coord: tuple[int, int]) -> bool:
         return self._has_wall(coord, WEST)
 
+    def is_close_cell(self, coord: tuple[int, int]) -> bool:
+        count = 0
+        if self.is_north_wall(coord):
+            count += 1
+        if self.is_south_wall(coord):
+            count += 1
+        if self.is_west_wall(coord):
+            count += 1
+        if self.is_east_wall(coord):
+            count += 1
+        return True if count == 4 else False
+
     def can_move(self, coord: tuple[int, int], direction: Direction) -> bool:
         """Tell if there is no wall in a direction from a cell.
 

@@ -1,15 +1,6 @@
 """Pygame window and main game object."""
 
 import os
-
-# SDL tries to create an OpenGL (GLX) context to accelerate the window
-# surface. On some machines (broken/missing GL drivers, remote X) this
-# triggers a fatal X11 error that kills the process before Python can
-# catch it. Forcing the plain software framebuffer avoids GLX entirely.
-# Must be set before pygame initialises the display.
-os.environ.setdefault("SDL_FRAMEBUFFER_ACCELERATION", "0")
-os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
-
 import pygame
 from src.constants import (
     DOWN,
@@ -24,6 +15,16 @@ from src.renderer.maze_renderer import MazeRenderer
 from src.renderer.pacman_renderer import PacmanRenderer
 from src.utils.maze import Maze
 from src.models.config import Config
+from src.renderer.pacgum_renderer import PacgumRenderer
+from src.models.pacgum import Pacgum
+
+# SDL tries to create an OpenGL (GLX) context to accelerate the window
+# surface. On some machines (broken/missing GL drivers, remote X) this
+# triggers a fatal X11 error that kills the process before Python can
+# catch it. Forcing the plain software framebuffer avoids GLX entirely.
+# Must be set before pygame initialises the display.
+os.environ.setdefault("SDL_FRAMEBUFFER_ACCELERATION", "0")
+os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
 
 WIDTH_SIZE = 1920
@@ -59,9 +60,13 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = False
         self.maze = Maze(config=config)
+        self.pacgum = Pacgum(self.maze, config)
         self.maze_renderer = MazeRenderer(self.maze, self.screen.get_size())
         self.pacman_renderer = PacmanRenderer(self.maze,
                                               self.screen.get_size())
+        self.pacgum_renderer = PacgumRenderer(self.pacgum,
+                                              self.screen.get_size(),
+                                              self.maze)
 
         self.pacman_cell: tuple[int, int] = self._find_start_cell()
         self.pacman_step: int = 0
@@ -91,6 +96,7 @@ class Game:
             self.maze_renderer.draw(self.screen)
             self.pacman_renderer.draw(self.screen, self._pacman_position(),
                                       self.pacman_facing)
+            self.pacgum_renderer.draw(self.screen)
             pygame.display.flip()
 
     def _find_start_cell(self) -> tuple[int, int]:
