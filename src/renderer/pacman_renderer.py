@@ -11,7 +11,7 @@ from src.constants import (
     PACMAN_RADIUS_RATIO,
     Direction,
 )
-from src.renderer.draw_utils import compute_layout
+from src.renderer.draw_utils import compute_layout, to_pixel
 from src.utils.maze import Maze
 
 
@@ -63,26 +63,8 @@ class PacmanRenderer:
         """
         # Triangle wave: fully open at phase 0, closed at 0.5.
         mouth_angle = PACMAN_MOUTH_MAX_ANGLE * abs(2 * self._phase - 1)
-        self._fill_pacman(screen, self._to_pixel(position), direction,
-                          mouth_angle)
-
-    def _to_pixel(self, position: tuple[float, float]) -> tuple[int, int]:
-        """Convert a float cell position to the pixel of its center.
-
-        Args:
-            position: Position in cells, as floats (x, y).
-
-        Returns:
-            The pixel (x, y) where Pac-Man's center is drawn.
-        """
-        x, y = position
-        offset_x, offset_y = self.offset
-        half_cell = self.cell_size // 2
-        # int() keeps whole cells exact: x=3.0 is always 3 cells away
-        # from x=0.0, whatever the rounding of the half cell.
-        pixel_x = offset_x + half_cell + int(x * self.cell_size)
-        pixel_y = offset_y + half_cell + int(y * self.cell_size)
-        return pixel_x, pixel_y
+        center = to_pixel(position, self.cell_size, self.offset)
+        self._fill_pacman(screen, center, direction, mouth_angle)
 
     def _fill_pacman(self, screen: pygame.Surface, center: tuple[int, int],
                      direction: Direction, mouth_angle: float) -> None:

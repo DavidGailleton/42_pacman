@@ -1,7 +1,16 @@
 """Tests for the ghosts' chase targets and movement."""
 
-from src.ghost_ai import Blinky, Clyde, Inky, Pinky
-from src.constants import EAST, NORTH, SOUTH, WEST
+from src.ghost_ai import Blinky, Clyde, GhostState, Inky, Pinky
+from src.constants import (
+    DOWN,
+    EAST,
+    GHOST_FRAMES_PER_CELL,
+    LEFT,
+    NORTH,
+    RIGHT,
+    SOUTH,
+    WEST,
+)
 from src.utils.maze import Maze
 
 ALL = NORTH | EAST | SOUTH | WEST
@@ -81,3 +90,71 @@ def test_next_step_unreachable_stays() -> None:
     """A ghost that cannot reach anything stays in place."""
     blinky = Blinky((0, 0), GridMaze([[ALL, ALL], [ALL, ALL]]))
     assert blinky.next_step((1, 1), (0, 0)) == (0, 0)
+
+
+def test_no_u_turn_when_target_behind() -> None:
+    """In the open, a ghost does not turn back toward its target."""
+    blinky = Blinky((0, 0), open_maze())
+    blinky.position = (5, 5)
+    blinky.direction = RIGHT
+    assert blinky._choose_direction((2, 5), (0, 0)) != LEFT
+
+
+def test_dead_end_turns_back() -> None:
+    """In a dead end, going back is the only way and is taken."""
+    # Corridor (0, 0) - (1, 0), the right cell is a dead end.
+    grid = [[NORTH | WEST | SOUTH, NORTH | EAST | SOUTH]]
+    blinky = Blinky((0, 0), GridMaze(grid))
+    blinky.position = (1, 0)
+    blinky.direction = RIGHT
+    assert blinky._choose_direction((0, 0), (0, 0)) == LEFT
+
+
+def test_single_exit_is_taken() -> None:
+    """In a bend, the only exit is taken whatever the target."""
+    # (1, 0) -> (0, 0) -> (0, 1): (0, 0) opens east and south only.
+    grid = [
+        [NORTH | WEST, NORTH | EAST | SOUTH],
+        [WEST | EAST | SOUTH, ALL],
+    ]
+    blinky = Blinky((1, 1), GridMaze(grid))
+    blinky.position = (0, 0)
+    blinky.direction = LEFT
+    # Pac-Man is behind, but the bend only allows going down.
+    assert blinky._choose_direction((1, 0), (0, 0)) == DOWN
+
+
+def test_corner_turn_when_frightened() -> None:
+    """A frightened ghost turns toward the inside in its corner."""
+    maze = open_maze()
+    pinky = Pinky((19, 0), maze)
+    pinky.state = GhostState.FRIGHTENED
+    pinky.direction = RIGHT
+    assert pinky._choose_direction((5, 5), (0, 0)) == DOWN
+    clyde = Clyde((0, 19), maze)
+    clyde.state = GhostState.FRIGHTENED
+    clyde.direction = DOWN
+    assert clyde._choose_direction((5, 5), (0, 0)) == RIGHT
+
+
+def test_move_one_cell_in_frames() -> None:
+    """A ghost reaches the next cell after GHOST_FRAMES_PER_CELL."""
+    blinky = Blinky((0, 0), open_maze())
+    for _ in range(GHOST_FRAMES_PER_CELL // 2):
+        blinky.move((0, 10), (0, 0))
+    assert blinky.float_position() == (0.0, 0.5)
+    for _ in range(GHOST_FRAMES_PER_CELL // 2):
+        blinky.move((0, 10), (0, 0))
+    assert blinky.position == (0, 1)
+    assert blinky.step == 0
+
+
+def test_false_wall_keeps_maze_intact() -> None:
+    """The false wall is only added to a copy of the grid."""
+    maze = open_maze()
+    blinky = Blinky((0, 0), maze)
+    blinky.position = (5, 5)
+    blinky.direction = RIGHT
+    grid = blinky._grid_with_wall_behind()
+    assert grid[5][5] & WEST
+    assert maze.get_maze()[5][5] == 0

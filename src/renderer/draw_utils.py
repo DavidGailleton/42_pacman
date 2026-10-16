@@ -67,3 +67,28 @@ def compute_layout(maze_shape: tuple[int, int],
     offset_x = screen_w // 2 - nb_cell_x * cell_size // 2
     offset_y = int(screen_h * (1 - MAZE_SCREEN_RATIO) / 2)
     return cell_size, (offset_x, offset_y)
+
+
+def to_pixel(position: tuple[float, float], cell_size: int,
+             offset: tuple[int, int]) -> tuple[int, int]:
+    """Convert a float cell position to the pixel of its center.
+
+    Every moving renderer uses this so a position lands on the same
+    pixel whatever is drawn there.
+
+    Args:
+        position: Position in cells, as floats (x, y).
+        cell_size: Size of a cell, in pixels.
+        offset: Pixel offset (x, y) of the maze top-left corner.
+
+    Returns:
+        The pixel (x, y) of the center of the drawn shape.
+    """
+    x, y = position
+    offset_x, offset_y = offset
+    half_cell = cell_size // 2
+    # int() keeps whole cells exact: x=3.0 is always 3 cells away
+    # from x=0.0, whatever the rounding of the half cell.
+    pixel_x = offset_x + half_cell + int(x * cell_size)
+    pixel_y = offset_y + half_cell + int(y * cell_size)
+    return pixel_x, pixel_y
