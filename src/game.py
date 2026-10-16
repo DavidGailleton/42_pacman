@@ -14,6 +14,8 @@ import pygame
 from src.renderer.maze_renderer import MazeRenderer
 from src.utils.maze import Maze
 from src.models.config import Config
+from src.renderer.pacgum_renderer import PacgumRenderer
+from src.models.pacgum import Pacgum
 
 
 WIDTH_SIZE = 1920
@@ -30,8 +32,11 @@ class Game:
         self.clock = pygame.time.Clock()
         self.running = False
         self.maze = Maze(config=config)
+        self.pacgum = Pacgum(self.maze, config)
         self.maze_renderer = MazeRenderer(self.maze, self.screen.get_size())
-
+        self.pacgum_renderer = PacgumRenderer(self.pacgum,
+                                              self.screen.get_size(),
+                                              self.maze)
         import time
 
         time.sleep(2)
@@ -47,5 +52,6 @@ class Game:
                 if event.type == pygame.QUIT:
                     self.running = False
             self.maze_renderer.draw(self.screen)
+            self.pacgum_renderer.draw(self.screen)
             pygame.display.flip()
             self.clock.tick(60)
