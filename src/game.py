@@ -64,6 +64,9 @@ class Game:
         self.maze_renderer = MazeRenderer(self.maze, self.screen.get_size())
         self.pacman_renderer = PacmanRenderer(self.maze,
                                               self.screen.get_size())
+        self.pacgum_renderer = PacgumRenderer(self.pacgum,
+                                              self.screen.get_size(),
+                                              self.maze)
 
         self.pacman_cell: tuple[int, int] = self._find_start_cell()
         self.pacman_step: int = 0
@@ -93,6 +96,7 @@ class Game:
             self.maze_renderer.draw(self.screen)
             self.pacman_renderer.draw(self.screen, self._pacman_position(),
                                       self.pacman_facing)
+            self.pacgum_renderer.draw(self.screen)
             pygame.display.flip()
 
     def _find_start_cell(self) -> tuple[int, int]:
