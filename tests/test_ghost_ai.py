@@ -1,7 +1,8 @@
 """Tests for the ghosts' chase targets and movement."""
 
 from src.ghost_ai import Blinky, Clyde, Inky, Pinky
-from src.utils.maze import EAST, NORTH, SOUTH, WEST, Maze
+from src.constants import EAST, NORTH, SOUTH, WEST
+from src.utils.maze import Maze
 
 ALL = NORTH | EAST | SOUTH | WEST
 

@@ -1,34 +1,49 @@
+"""Draw the maze walls."""
+
+from src.constants import BLACK_COLOR, MAZE_COLOR, Color
+from src.renderer.draw_utils import compute_layout, fill_circle, fill_rect
 from src.utils.maze import Maze
 import pygame
 
 
-MAZE_SCREEN_RATIO = 0.8
-BLACK_COLOR = (0, 0, 0)
-MAZE_COLOR = (33, 33, 222)
-
-
 class MazeRenderer:
+    """Draw the maze walls, pre-rendered once on a surface."""
+
     def __init__(self, maze: Maze, screen_size: tuple[int, int]) -> None:
+        """Build the maze surface.
+
+        Args:
+            maze: Maze to draw.
+            screen_size: Screen size in pixels, as (width, height).
+        """
         self.screen_size = screen_size
         self.set_maze(maze)
 
     def set_maze(self, maze: Maze) -> None:
-        self.maze = maze
-        width_x, height_y = maze.get_shape()
-        width, height = self.screen_size
-        width = int(width * MAZE_SCREEN_RATIO)
-        height = int(height * MAZE_SCREEN_RATIO)
-        width_cell = width / width_x
-        height_cell = height / height_y
+        """Change the maze and rebuild its surface.
 
-        self.cell_size = int(min(width_cell, height_cell))
+        Args:
+            maze: New maze to draw.
+        """
+        self.maze = maze
+        self.cell_size, self.offset = compute_layout(maze.get_shape(),
+                                                     self.screen_size)
         self.surface = self._build_surface()
 
     def draw(self, screen: pygame.Surface) -> None:
+        """Blit the pre-rendered maze on the screen.
+
+        Args:
+            screen: Surface to draw on.
+        """
         screen.blit(self.surface, (0, 0))
 
     def _build_surface(self) -> pygame.Surface:
+        """Draw every wall on a new surface the size of the screen.
 
+        Returns:
+            The surface with the maze drawn on it.
+        """
         screen = pygame.Surface(self.screen_size)
         screen.fill(BLACK_COLOR)
         first_thickness = self.cell_size // 3
@@ -44,49 +59,38 @@ class MazeRenderer:
                             half, BLACK_COLOR)
         return screen
 
-    def _get_offset(self) -> tuple[int, int]:
-        w, h = self.screen_size
-        nb_cell, _ = self.maze.get_shape()
-        maze_dist_middle = int(nb_cell * self.cell_size / 2)
-        middle_w = int(w / 2)
-        x = middle_w - maze_dist_middle
-        y = int(h * (1 - MAZE_SCREEN_RATIO) / 2)
-        return (y, x)
-
     def _draw_wall(self, screen: pygame.Surface,
                    segment: tuple[tuple[int, int], tuple[int, int]],
-                   thickness: int, half: int, color: tuple[int, int, int]
+                   thickness: int, half: int, color: Color
                    ) -> None:
+        """Draw one wall segment with rounded ends.
+
+        Args:
+            screen: Surface to draw on.
+            segment: Start and end points of the wall, in pixels.
+            thickness: Wall thickness, in pixels.
+            half: Radius of the rounded ends, in pixels.
+            color: Wall color.
+        """
         (x1, y1), (x2, y2) = segment
         if y1 == y2:
-            self._fill_rect(screen, (x1, y1 - half), (x2 - x1, thickness),
-                            color)
+            fill_rect(screen, (x1, y1 - half), (x2 - x1, thickness), color)
         else:
-            self._fill_rect(screen, (x1 - half, y1), (thickness, y2 - y1),
-                            color)
-        self._fill_circle(screen, half, (x1, y1), color)
-        self._fill_circle(screen, half, (x2, y2), color)
-
-    def _fill_rect(self, screen: pygame.Surface, coord: tuple[int, int],
-                   w_h: tuple[int, int], color: tuple[int, int, int]) -> None:
-        start_x, start_y = coord
-        w, h = w_h
-        for x in range(start_x, start_x + w):
-            for y in range(start_y, start_y + h):
-                screen.set_at((x, y), color)
-
-    def _fill_circle(self, screen: pygame.Surface, radius: int,
-                     coord_center: tuple[int, int],
-                     color: tuple[int, int, int]) -> None:
-        cx, cy = coord_center
-        for dy in range(-radius, radius + 1):
-            for dx in range(-radius, radius + 1):
-                if (dy * dy + dx * dx) <= radius * radius:
-                    screen.set_at((cx + dx, cy + dy), color)
+            fill_rect(screen, (x1 - half, y1), (thickness, y2 - y1), color)
+        fill_circle(screen, half, (x1, y1), color)
+        fill_circle(screen, half, (x2, y2), color)
 
     def _get_segments(self) -> list[tuple[tuple[int, int], tuple[int, int]]]:
-        start_y, start_x = self._get_offset()
-        rows, cols = self.maze.get_shape()
+        """List the wall segments of the maze, in pixels.
+
+        Each wall shared by two cells is listed once: a cell gives its
+        north and west walls, plus its east / south walls on the border.
+
+        Returns:
+            The segments, as (start point, end point).
+        """
+        start_x, start_y = self.offset
+        cols, rows = self.maze.get_shape()
         size_c = self.cell_size
         segments: list[tuple[tuple[int, int], tuple[int, int]]] = []
 
