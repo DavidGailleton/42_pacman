@@ -66,3 +66,8 @@ PACMAN_FRAMES_PER_CELL: int = 10
 # Frames a ghost needs to go from one cell center to the next.
 # A bit slower than Pac-Man, so he can escape.
 GHOST_FRAMES_PER_CELL: int = 12
+
+# Pac-Man and a ghost collide when their centers are closer than this,
+# in cells. Both radii are 0.4 cell, so they touch at 0.8: 0.5 waits
+# until they visibly overlap, which is fairer for the player.
+COLLISION_DISTANCE: float = 0.5

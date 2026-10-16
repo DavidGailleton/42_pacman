@@ -12,10 +12,11 @@ from src.constants import (
     UP,
     Direction,
 )
-from src.ghost_ai import Blinky, Clyde, Ghost, Inky, Pinky
+from src.ghost_ai import Blinky, Clyde, Ghost, GhostState, Inky, Pinky
 from src.renderer.ghost_renderer import GhostRenderer
 from src.renderer.maze_renderer import MazeRenderer
 from src.renderer.pacman_renderer import PacmanRenderer
+from src.utils.collision import is_colliding
 from src.utils.maze import Maze
 from src.models.config import Config
 
@@ -126,6 +127,22 @@ class Game:
         inky = Inky((0, height - 1), self.maze, blinky)
         clyde = Clyde((width - 1, height - 1), self.maze)
         return [blinky, pinky, inky, clyde]
+
+    def _colliding_ghosts(self) -> list[Ghost]:
+        """List the ghosts Pac-Man is touching.
+
+        Eaten ghosts are skipped: they only wait in their corner.
+
+        Returns:
+            The ghosts colliding with Pac-Man, maybe none.
+        """
+        pacman = self._pacman_position()
+        return [
+            ghost
+            for ghost in self.ghosts
+            if ghost.state is not GhostState.EATEN
+            and is_colliding(pacman, ghost.float_position())
+        ]
 
     def _find_start_cell(self) -> tuple[int, int]:
         """Find the cell closest to the maze center that can be entered.
