@@ -35,9 +35,8 @@ os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 WIDTH_SIZE = 1920
 HEIGHT_SIZE = 1080
 
-# Temporary test key: F frightens every ghost for this many seconds,
-# until super-pacgums exist.
-GHOST_TEST_FRIGHTEN_TIME: float = 7.0
+# Seconds the ghosts stay edible after a super-pacgum is eaten.
+FRIGHTEN_TIME: float = 7.0
 
 # Keys that move Pac-Man: arrows and WASD.
 KEY_TO_DIRECTION: dict[int, Direction] = {
@@ -212,7 +211,8 @@ class Game:
         self.score += point
         print(self.score)
         if superman:
-            pass
+            for ghost in self.ghosts:
+                ghost.frighten(FRIGHTEN_TIME)
         if self.pacgum.is_empty():
             pass
 
@@ -241,18 +241,13 @@ class Game:
         """Remember the move asked by a key press.
 
         The move replaces any move already in memory. It is applied by
-        ``_update_pacman`` as soon as it is possible. F frightens the
-        ghosts (temporary test key).
+        ``_update_pacman`` as soon as it is possible.
 
         Args:
             key: Pygame key code of the pressed key.
         """
         if key in KEY_TO_DIRECTION:
             self.next_move = KEY_TO_DIRECTION[key]
-        elif key == pygame.K_f:
-            # Temporary test key, see GHOST_TEST_FRIGHTEN_TIME.
-            for ghost in self.ghosts:
-                ghost.frighten(GHOST_TEST_FRIGHTEN_TIME)
 
     def _update_pacman(self) -> None:
         """Move Pac-Man by one frame."""
