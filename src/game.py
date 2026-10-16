@@ -91,13 +91,21 @@ class Game:
                 elif event.type == pygame.KEYDOWN:
                     self._handle_key(event.key)
             self._update_pacman()
+            self._eat_pacgum()
             if self.current_move is not None:
                 self.pacman_renderer.update(dt)
             self.maze_renderer.draw(self.screen)
+            self.pacgum_renderer.draw(self.screen)
             self.pacman_renderer.draw(self.screen, self._pacman_position(),
                                       self.pacman_facing)
-            self.pacgum_renderer.draw(self.screen)
             pygame.display.flip()
+
+    def _eat_pacgum(self) -> None:
+        superman, point = self.pacgum.eat(self.pacman_cell)
+        if superman:
+            pass
+        if self.pacgum.is_empty():
+            pass
 
     def _find_start_cell(self) -> tuple[int, int]:
         """Find the cell closest to the maze center that can be entered.

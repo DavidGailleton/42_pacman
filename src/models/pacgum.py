@@ -24,7 +24,7 @@ class Pacgum:
 
         for x in range(cols):
             for y in range(rows):
-                if (not maze.is_close_cell((x, y)) and
+                if (not maze.is_closed((x, y)) and
                    (x, y) not in self.super_pacgum):
                     pacgum.add((x, y))
         return pacgum
