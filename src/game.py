@@ -31,14 +31,6 @@ from src.models.pacgum import Pacgum
 os.environ.setdefault("SDL_FRAMEBUFFER_ACCELERATION", "0")
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
-# SDL tries to create an OpenGL (GLX) context to accelerate the window
-# surface. On some machines (broken/missing GL drivers, remote X) this
-# triggers a fatal X11 error that kills the process before Python can
-# catch it. Forcing the plain software framebuffer avoids GLX entirely.
-# Must be set before pygame initialises the display.
-os.environ.setdefault("SDL_FRAMEBUFFER_ACCELERATION", "0")
-os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
-
 
 WIDTH_SIZE = 1920
 HEIGHT_SIZE = 1080
@@ -80,11 +72,9 @@ class Game:
         self.maze = Maze(config=config)
         self.pacgum = Pacgum(self.maze, config)
         self.maze_renderer = MazeRenderer(self.maze, self.screen.get_size())
-        
         self.pacman_renderer = PacmanRenderer(
             self.maze, self.screen.get_size()
         )
-  
         self.ghost_renderer = GhostRenderer(self.maze, self.screen.get_size())
         self.ghosts: list[Ghost] = self._make_ghosts()
 
@@ -149,13 +139,12 @@ class Game:
             self.pacman_renderer.update(dt)
         self.ghost_renderer.update(dt)
         self._handle_collisions()
-        self._update_pacman()
         self._eat_pacgum()
 
-
     def _draw(self) -> None:
-        """Draw the maze, Pac-Man and the ghosts, then show the frame."""
+        """Draw the maze, pacgums, Pac-Man and ghosts, then show it."""
         self.maze_renderer.draw(self.screen)
+        self.pacgum_renderer.draw(self.screen)
         self.pacman_renderer.draw(
             self.screen, self._pacman_position(), self.pacman_facing
         )
@@ -217,7 +206,6 @@ class Game:
             if ghost.state is not GhostState.EATEN
             and is_colliding(pacman, ghost.float_position())
         ]
-
 
     def _eat_pacgum(self) -> None:
         superman, point = self.pacgum.eat(self.pacman_cell)
