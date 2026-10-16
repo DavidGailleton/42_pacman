@@ -59,6 +59,7 @@ class Game:
         self.screen = pygame.display.set_mode((WIDTH_SIZE, HEIGHT_SIZE))
         self.clock = pygame.time.Clock()
         self.running = False
+        self.score = 0
         self.maze = Maze(config=config)
         self.pacgum = Pacgum(self.maze, config)
         self.maze_renderer = MazeRenderer(self.maze, self.screen.get_size())
@@ -102,6 +103,8 @@ class Game:
 
     def _eat_pacgum(self) -> None:
         superman, point = self.pacgum.eat(self.pacman_cell)
+        self.score += point
+        print(self.score)
         if superman:
             pass
         if self.pacgum.is_empty():
