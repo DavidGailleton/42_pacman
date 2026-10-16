@@ -3,6 +3,13 @@
 from abc import ABC, abstractmethod
 from enum import Enum
 
+from src.constants import (
+    BLINKY_COLOR,
+    CLYDE_COLOR,
+    INKY_COLOR,
+    PINKY_COLOR,
+    Color,
+)
 from src.utils.bfs import bfs
 from src.utils.maze import Maze
 
@@ -39,10 +46,13 @@ class Ghost(ABC):
     implementing ``chase_target``.
 
     Attributes:
+        color: Body color of the ghost, set by each subclass.
         corner: Cell where the ghost starts and respawns.
         position: Cell where the ghost currently is.
         state: Current state of the ghost.
     """
+
+    color: Color
 
     def __init__(self, corner: Cell, maze: Maze) -> None:
         """Place the ghost in its corner, in chase mode.
@@ -166,6 +176,8 @@ class Ghost(ABC):
 class Blinky(Ghost):
     """The red ghost: chases Pac-Man directly."""
 
+    color = BLINKY_COLOR
+
     def chase_target(self, pacman: Cell, pacman_direction: Cell) -> Cell:
         """Aim straight at Pac-Man.
 
@@ -181,6 +193,8 @@ class Blinky(Ghost):
 
 class Pinky(Ghost):
     """The pink ghost: ambushes the cells in front of Pac-Man."""
+
+    color = PINKY_COLOR
 
     def chase_target(self, pacman: Cell, pacman_direction: Cell) -> Cell:
         """Aim a few cells ahead of Pac-Man, in the way he is going.
@@ -208,6 +222,8 @@ class Inky(Ghost):
     Attributes:
         blinky: The Blinky ghost Inky works with.
     """
+
+    color = INKY_COLOR
 
     def __init__(self, corner: Cell, maze: Maze, blinky: Blinky) -> None:
         """Place Inky in its corner and remember Blinky.
@@ -244,6 +260,8 @@ class Inky(Ghost):
 
 class Clyde(Ghost):
     """The orange ghost: chases Pac-Man but flees when too close."""
+
+    color = CLYDE_COLOR
 
     def chase_target(self, pacman: Cell, pacman_direction: Cell) -> Cell:
         """Chase Pac-Man from afar, go back to the corner when near.

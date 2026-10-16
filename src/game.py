@@ -20,6 +20,8 @@ from src.constants import (
     UP,
     Direction,
 )
+from src.ghost_ai import Blinky, Clyde, Ghost, GhostState, Inky, Pinky
+from src.renderer.ghost_renderer import GhostRenderer
 from src.renderer.maze_renderer import MazeRenderer
 from src.renderer.pacman_renderer import PacmanRenderer
 from src.utils.maze import Maze
@@ -62,6 +64,9 @@ class Game:
         self.maze_renderer = MazeRenderer(self.maze, self.screen.get_size())
         self.pacman_renderer = PacmanRenderer(self.maze,
                                               self.screen.get_size())
+        self.ghost_renderer = GhostRenderer(self.maze,
+                                            self.screen.get_size())
+        self.ghosts: list[Ghost] = self._make_test_ghosts()
 
         self.pacman_cell: tuple[int, int] = self._find_start_cell()
         self.pacman_step: int = 0
@@ -91,7 +96,30 @@ class Game:
             self.maze_renderer.draw(self.screen)
             self.pacman_renderer.draw(self.screen, self._pacman_position(),
                                       self.pacman_facing)
+            self.ghost_renderer.update(dt)
+            for ghost in self.ghosts:
+                x, y = ghost.position
+                self.ghost_renderer.draw(self.screen, (float(x), float(y)),
+                                         ghost.color, ghost.state)
             pygame.display.flip()
+
+    def _make_test_ghosts(self) -> list[Ghost]:
+        """Place one ghost per corner, one per look (renderer test).
+
+        Temporary: the ghosts do not move yet. Blinky and Pinky are
+        normal, Inky is frightened and Clyde is eaten.
+
+        Returns:
+            The four ghosts.
+        """
+        width, height = self.maze.get_shape()
+        blinky = Blinky((0, 0), self.maze)
+        pinky = Pinky((width - 1, 0), self.maze)
+        inky = Inky((0, height - 1), self.maze, blinky)
+        clyde = Clyde((width - 1, height - 1), self.maze)
+        inky.state = GhostState.FRIGHTENED
+        clyde.state = GhostState.EATEN
+        return [blinky, pinky, inky, clyde]
 
     def _find_start_cell(self) -> tuple[int, int]:
         """Find the cell closest to the maze center that can be entered.

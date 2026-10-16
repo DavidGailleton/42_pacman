@@ -25,14 +25,36 @@ BLACK_COLOR: Color = (0, 0, 0)
 MAZE_COLOR: Color = (33, 33, 222)
 PACMAN_COLOR: Color = (255, 255, 0)
 
+# Body color of each ghost, in chase mode.
+BLINKY_COLOR: Color = (255, 0, 0)
+PINKY_COLOR: Color = (255, 184, 255)
+INKY_COLOR: Color = (0, 255, 255)
+CLYDE_COLOR: Color = (255, 184, 82)
+
+# Body and face colors of a frightened (edible) ghost.
+FRIGHTENED_COLOR: Color = (33, 33, 255)
+FRIGHTENED_FACE_COLOR: Color = (255, 184, 174)
+
+GHOST_EYE_COLOR: Color = (255, 255, 255)
+GHOST_PUPIL_COLOR: Color = (33, 33, 222)
+
 # Pac-Man radius, as a fraction of a cell size.
-PACMAN_RADIUS_RATIO: float = 0.4
+PACMAN_RADIUS_RATIO: float = 0.3
 
 # Half-angle of the mouth when fully open, in degrees.
 PACMAN_MOUTH_MAX_ANGLE: float = 45.0
 
 # Mouth open/close cycles per second.
 PACMAN_MOUTH_SPEED: float = 3.0
+
+# Ghost radius, as a fraction of a cell size.
+GHOST_RADIUS_RATIO: float = 0.3
+
+# Opacity of an eaten ghost's body: 0 = invisible, 1 = opaque.
+GHOST_EATEN_ALPHA: float = 0.35
+
+# Skirt wiggle cycles per second.
+GHOST_SKIRT_SPEED: float = 4.0
 
 # Frames per second the game loop is locked to.
 FPS: int = 60
