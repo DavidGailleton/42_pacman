@@ -71,3 +71,6 @@ GHOST_FRAMES_PER_CELL: int = 12
 # in cells. Both radii are 0.4 cell, so they touch at 0.8: 0.5 waits
 # until they visibly overlap, which is fairer for the player.
 COLLISION_DISTANCE: float = 0.5
+
+# Seconds the game freezes when Pac-Man eats a ghost.
+EAT_FREEZE_TIME: float = 0.2

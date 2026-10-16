@@ -5,6 +5,7 @@ import os
 import pygame
 from src.constants import (
     DOWN,
+    EAT_FREEZE_TIME,
     FPS,
     LEFT,
     PACMAN_FRAMES_PER_CELL,
@@ -81,6 +82,13 @@ class Game:
         # Direction drawn, kept when Pac-Man stops.
         self.pacman_facing: Direction = RIGHT
 
+        # A chasing ghost caught Pac-Man: nothing moves anymore.
+        self.game_over: bool = False
+        # Seconds of freeze left after Pac-Man ate a ghost, and that
+        # ghost, sent to its corner when the freeze ends.
+        self.freeze_timer: float = 0.0
+        self.eaten_ghost: Ghost | None = None
+
     def __del__(self) -> None:
         """Shut pygame down when the game object is destroyed."""
         pygame.quit()
@@ -95,25 +103,70 @@ class Game:
                     self.running = False
                 elif event.type == pygame.KEYDOWN:
                     self._handle_key(event.key)
-            self._update_pacman()
-            for ghost in self.ghosts:
-                ghost.update_state(dt)
-                ghost.move(self.pacman_cell, self.pacman_facing)
-            if self.current_move is not None:
-                self.pacman_renderer.update(dt)
-            self.maze_renderer.draw(self.screen)
-            self.pacman_renderer.draw(
-                self.screen, self._pacman_position(), self.pacman_facing
+            self._update(dt)
+            self._draw()
+
+    def _update(self, dt: float) -> None:
+        """Advance the game by one frame.
+
+        Nothing moves after a game over, nor during the short freeze
+        that follows eating a ghost.
+
+        Args:
+            dt: Seconds since the last frame.
+        """
+        if self.game_over:
+            return
+        if self.freeze_timer > 0:
+            self.freeze_timer -= dt
+            if self.freeze_timer <= 0 and self.eaten_ghost is not None:
+                self.eaten_ghost.eat()
+                self.eaten_ghost = None
+            return
+        self._update_pacman()
+        for ghost in self.ghosts:
+            ghost.update_state(dt)
+            ghost.move(self.pacman_cell, self.pacman_facing)
+        if self.current_move is not None:
+            self.pacman_renderer.update(dt)
+        self.ghost_renderer.update(dt)
+        self._handle_collisions()
+
+    def _draw(self) -> None:
+        """Draw the maze, Pac-Man and the ghosts, then show the frame."""
+        self.maze_renderer.draw(self.screen)
+        self.pacman_renderer.draw(
+            self.screen, self._pacman_position(), self.pacman_facing
+        )
+        for ghost in self.ghosts:
+            self.ghost_renderer.draw(
+                self.screen,
+                ghost.float_position(),
+                ghost.color,
+                ghost.state,
             )
-            self.ghost_renderer.update(dt)
-            for ghost in self.ghosts:
-                self.ghost_renderer.draw(
-                    self.screen,
-                    ghost.float_position(),
-                    ghost.color,
-                    ghost.state,
-                )
-            pygame.display.flip()
+        pygame.display.flip()
+
+    def _handle_collisions(self) -> None:
+        """React to Pac-Man touching ghosts.
+
+        A chasing ghost ends the game. A frightened ghost is eaten: the
+        game freezes a moment, then the ghost goes to its corner. Eaten
+        ghosts are ignored (see ``_colliding_ghosts``).
+        """
+        ghosts = self._colliding_ghosts()
+        # Chasers first: touching one loses, even if a frightened
+        # ghost is touched on the same frame.
+        if any(ghost.state is GhostState.CHASE for ghost in ghosts):
+            self.game_over = True
+            return
+        for ghost in ghosts:
+            if ghost.state is GhostState.FRIGHTENED:
+                # One ghost per freeze: another one still touching is
+                # caught on the frame after this freeze ends.
+                self.eaten_ghost = ghost
+                self.freeze_timer = EAT_FREEZE_TIME
+                return
 
     def _make_ghosts(self) -> list[Ghost]:
         """Place one ghost in each corner of the maze.
