@@ -33,3 +33,10 @@ PACMAN_MOUTH_MAX_ANGLE: float = 45.0
 
 # Mouth open/close cycles per second.
 PACMAN_MOUTH_SPEED: float = 3.0
+
+# Frames per second the game loop is locked to.
+FPS: int = 60
+
+# Frames Pac-Man needs to go from one cell center to the next.
+# At 60 FPS, 10 frames per cell = 6 cells per second.
+PACMAN_FRAMES_PER_CELL: int = 10
