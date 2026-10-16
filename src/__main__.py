@@ -3,9 +3,6 @@
 from src.game import Game
 
 
-from typing import NoReturn
-
-
 def greet(name: str) -> str:
     """Return a greeting message.
 

@@ -2,14 +2,6 @@
 
 import os
 
-# SDL tries to create an OpenGL (GLX) context to accelerate the window
-# surface. On some machines (broken/missing GL drivers, remote X) this
-# triggers a fatal X11 error that kills the process before Python can
-# catch it. Forcing the plain software framebuffer avoids GLX entirely.
-# Must be set before pygame initialises the display.
-os.environ.setdefault("SDL_FRAMEBUFFER_ACCELERATION", "0")
-os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
-
 import pygame
 from src.constants import (
     DOWN,
@@ -20,16 +12,28 @@ from src.constants import (
     UP,
     Direction,
 )
-from src.ghost_ai import Blinky, Clyde, Ghost, GhostState, Inky, Pinky
+from src.ghost_ai import Blinky, Clyde, Ghost, Inky, Pinky
 from src.renderer.ghost_renderer import GhostRenderer
 from src.renderer.maze_renderer import MazeRenderer
 from src.renderer.pacman_renderer import PacmanRenderer
 from src.utils.maze import Maze
 from src.models.config import Config
 
+# SDL tries to create an OpenGL (GLX) context to accelerate the window
+# surface. On some machines (broken/missing GL drivers, remote X) this
+# triggers a fatal X11 error that kills the process before Python can
+# catch it. Forcing the plain software framebuffer avoids GLX entirely.
+# Must be set before pygame initialises the display.
+os.environ.setdefault("SDL_FRAMEBUFFER_ACCELERATION", "0")
+os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
+
 
 WIDTH_SIZE = 1920
 HEIGHT_SIZE = 1080
+
+# Temporary test key: F frightens every ghost for this many seconds,
+# until super-pacgums exist.
+GHOST_TEST_FRIGHTEN_TIME: float = 7.0
 
 # Keys that move Pac-Man: arrows and WASD.
 KEY_TO_DIRECTION: dict[int, Direction] = {
@@ -62,11 +66,11 @@ class Game:
         self.running = False
         self.maze = Maze(config=config)
         self.maze_renderer = MazeRenderer(self.maze, self.screen.get_size())
-        self.pacman_renderer = PacmanRenderer(self.maze,
-                                              self.screen.get_size())
-        self.ghost_renderer = GhostRenderer(self.maze,
-                                            self.screen.get_size())
-        self.ghosts: list[Ghost] = self._make_test_ghosts()
+        self.pacman_renderer = PacmanRenderer(
+            self.maze, self.screen.get_size()
+        )
+        self.ghost_renderer = GhostRenderer(self.maze, self.screen.get_size())
+        self.ghosts: list[Ghost] = self._make_ghosts()
 
         self.pacman_cell: tuple[int, int] = self._find_start_cell()
         self.pacman_step: int = 0
@@ -91,23 +95,27 @@ class Game:
                 elif event.type == pygame.KEYDOWN:
                     self._handle_key(event.key)
             self._update_pacman()
+            for ghost in self.ghosts:
+                ghost.update_state(dt)
+                ghost.move(self.pacman_cell, self.pacman_facing)
             if self.current_move is not None:
                 self.pacman_renderer.update(dt)
             self.maze_renderer.draw(self.screen)
-            self.pacman_renderer.draw(self.screen, self._pacman_position(),
-                                      self.pacman_facing)
+            self.pacman_renderer.draw(
+                self.screen, self._pacman_position(), self.pacman_facing
+            )
             self.ghost_renderer.update(dt)
             for ghost in self.ghosts:
-                x, y = ghost.position
-                self.ghost_renderer.draw(self.screen, (float(x), float(y)),
-                                         ghost.color, ghost.state)
+                self.ghost_renderer.draw(
+                    self.screen,
+                    ghost.float_position(),
+                    ghost.color,
+                    ghost.state,
+                )
             pygame.display.flip()
 
-    def _make_test_ghosts(self) -> list[Ghost]:
-        """Place one ghost per corner, one per look (renderer test).
-
-        Temporary: the ghosts do not move yet. Blinky and Pinky are
-        normal, Inky is frightened and Clyde is eaten.
+    def _make_ghosts(self) -> list[Ghost]:
+        """Place one ghost in each corner of the maze.
 
         Returns:
             The four ghosts.
@@ -117,8 +125,6 @@ class Game:
         pinky = Pinky((width - 1, 0), self.maze)
         inky = Inky((0, height - 1), self.maze, blinky)
         clyde = Clyde((width - 1, height - 1), self.maze)
-        inky.state = GhostState.FRIGHTENED
-        clyde.state = GhostState.EATEN
         return [blinky, pinky, inky, clyde]
 
     def _find_start_cell(self) -> tuple[int, int]:
@@ -134,8 +140,9 @@ class Game:
         width, height = self.maze.get_shape()
         center_x, center_y = width // 2, height // 2
         cells = [(x, y) for y in range(height) for x in range(width)]
-        cells.sort(key=lambda cell: abs(cell[0] - center_x)
-                   + abs(cell[1] - center_y))
+        cells.sort(
+            key=lambda cell: abs(cell[0] - center_x) + abs(cell[1] - center_y)
+        )
         for cell in cells:
             if not self.maze.is_closed(cell):
                 return cell
@@ -145,36 +152,46 @@ class Game:
         """Remember the move asked by a key press.
 
         The move replaces any move already in memory. It is applied by
-        ``_update_pacman`` as soon as it is possible.
+        ``_update_pacman`` as soon as it is possible. F frightens the
+        ghosts (temporary test key).
 
         Args:
             key: Pygame key code of the pressed key.
         """
         if key in KEY_TO_DIRECTION:
             self.next_move = KEY_TO_DIRECTION[key]
+        elif key == pygame.K_f:
+            # Temporary test key, see GHOST_TEST_FRIGHTEN_TIME.
+            for ghost in self.ghosts:
+                ghost.frighten(GHOST_TEST_FRIGHTEN_TIME)
 
     def _update_pacman(self) -> None:
         """Move Pac-Man by one frame."""
         # Turning back is always possible, even between two cells:
         # restart from the cell we were heading to.
-        if (self.current_move is not None and self.next_move is not None
-                and self._is_opposite(self.current_move, self.next_move)
-                and self.pacman_step > 0):
-            self.pacman_cell = self._neighbour(self.pacman_cell,
-                                               self.current_move)
+        if (
+            self.current_move is not None
+            and self.next_move is not None
+            and self._is_opposite(self.current_move, self.next_move)
+            and self.pacman_step > 0
+        ):
+            self.pacman_cell = self._neighbour(
+                self.pacman_cell, self.current_move
+            )
             self.pacman_step = PACMAN_FRAMES_PER_CELL - self.pacman_step
             self.current_move = self.next_move
             self.next_move = None
 
         if self.pacman_step == 0:
             # On a cell center: the only place where a turn can happen.
-            if (self.next_move is not None
-                    and self.maze.can_move(self.pacman_cell, self.next_move)):
+            if self.next_move is not None and self.maze.can_move(
+                self.pacman_cell, self.next_move
+            ):
                 self.current_move = self.next_move
                 self.next_move = None
-            if (self.current_move is not None
-                    and not self.maze.can_move(self.pacman_cell,
-                                               self.current_move)):
+            if self.current_move is not None and not self.maze.can_move(
+                self.pacman_cell, self.current_move
+            ):
                 # Wall ahead and nothing usable in memory: stop.
                 self.current_move = None
 
@@ -183,8 +200,9 @@ class Game:
         self.pacman_facing = self.current_move
         self.pacman_step += 1
         if self.pacman_step == PACMAN_FRAMES_PER_CELL:
-            self.pacman_cell = self._neighbour(self.pacman_cell,
-                                               self.current_move)
+            self.pacman_cell = self._neighbour(
+                self.pacman_cell, self.current_move
+            )
             self.pacman_step = 0
 
     def _pacman_position(self) -> tuple[float, float]:
@@ -202,8 +220,9 @@ class Game:
         return x + dx * progress, y + dy * progress
 
     @staticmethod
-    def _neighbour(cell: tuple[int, int],
-                   direction: Direction) -> tuple[int, int]:
+    def _neighbour(
+        cell: tuple[int, int], direction: Direction
+    ) -> tuple[int, int]:
         """Return the cell next to ``cell`` in ``direction``.
 
         Args:
