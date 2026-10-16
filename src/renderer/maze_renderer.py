@@ -28,19 +28,20 @@ class MazeRenderer:
         screen.blit(self.surface, (0, 0))
 
     def _build_surface(self) -> pygame.Surface:
-        start_y, start_x = self._get_offset()
-        max_x, max_y = self.maze.get_shape()
 
-        tmp_y, tmp_x = (start_y, start_x)
         screen = pygame.Surface(self.screen_size)
         screen.fill(BLACK_COLOR)
-        for x in range(0, max_x):
-            tmp_y = start_y
-            for y in range(0, max_y):
-                self._draw_cell(screen, (tmp_y, tmp_x), (x, y))
-                tmp_y += (self.cell_size)
-            tmp_x += (self.cell_size)
-
+        first_thickness = self.cell_size // 3
+        second_thickness = first_thickness - 6
+        segments = self._get_segments()
+        for segment in segments:
+            half = first_thickness // 2
+            self._draw_wall(screen, segment, first_thickness,
+                            half, MAZE_COLOR)
+        for segment in segments:
+            half = second_thickness // 2
+            self._draw_wall(screen, segment, second_thickness,
+                            half, BLACK_COLOR)
         return screen
 
     def _get_offset(self) -> tuple[int, int]:
@@ -61,14 +62,14 @@ class MazeRenderer:
             self._fill_rect(screen, (x1, y1 - half), (x2 - x1, thickness),
                             color)
         else:
-            self._fill_rect(screen, (x1 - half, y1), (thickness, y1 - y2),
+            self._fill_rect(screen, (x1 - half, y1), (thickness, y2 - y1),
                             color)
-        self._fill_circle(screen, half, (y1, x1), color)
-        self._fill_circle(screen, half, (y2, x2), color)
+        self._fill_circle(screen, half, (x1, y1), color)
+        self._fill_circle(screen, half, (x2, y2), color)
 
     def _fill_rect(self, screen: pygame.Surface, coord: tuple[int, int],
                    w_h: tuple[int, int], color: tuple[int, int, int]) -> None:
-        start_y, start_x = coord
+        start_x, start_y = coord
         w, h = w_h
         for x in range(start_x, start_x + w):
             for y in range(start_y, start_y + h):
@@ -77,7 +78,7 @@ class MazeRenderer:
     def _fill_circle(self, screen: pygame.Surface, radius: int,
                      coord_center: tuple[int, int],
                      color: tuple[int, int, int]) -> None:
-        cy, cx = coord_center
+        cx, cy = coord_center
         for dy in range(-radius, radius + 1):
             for dx in range(-radius, radius + 1):
                 if (dy * dy + dx * dx) <= radius * radius:
@@ -95,62 +96,14 @@ class MazeRenderer:
                 bottom = top + size_c
                 left = start_x + x * size_c
                 right = left + size_c
-                coord_maze = (y, x)
+                coord_maze = (x, y)
 
                 if self.maze.is_north_wall(coord_maze):
-                    segments.append(((top, left), (top, right)))
+                    segments.append(((left, top), (right, top)))
                 if self.maze.is_west_wall(coord_maze):
-                    segments.append(((top, left), (bottom, left)))
+                    segments.append(((left, top), (left, bottom)))
                 if x == cols - 1 and self.maze.is_east_wall(coord_maze):
-                    segments.append(((top, right), (bottom, right)))
+                    segments.append(((right, top), (right, bottom)))
                 if y == rows - 1 and self.maze.is_south_wall(coord_maze):
-                    segments.append(((bottom, left), (bottom, right)))
-
-    def _draw_cell(self, screen: pygame.Surface, offset: tuple[int, int],
-                   coord: tuple[int, int]) -> None:
-        tmp_y, tmp_x = offset
-        stock_x = tmp_x
-        is_close_cell = 0
-
-        if self.maze.is_west_wall(coord):
-            self._draw_vertical(screen, (tmp_y, tmp_x))
-            is_close_cell += 1
-
-        if self.maze.is_north_wall(coord):
-            self._draw_horizental(screen, (tmp_y, tmp_x))
-            is_close_cell += 1
-
-        tmp_x += self.cell_size
-        if self.maze.is_east_wall(coord):
-            self._draw_vertical(screen, (tmp_y, tmp_x))
-            is_close_cell += 1
-
-        tmp_y += self.cell_size
-        if self.maze.is_south_wall(coord):
-            self._draw_horizental(screen, (tmp_y, stock_x))
-            is_close_cell += 1
-
-        if is_close_cell == 4:
-            self._fill_cell(screen, offset)
-
-    def _fill_cell(self, screen: pygame.Surface, offset: tuple[int, int]
-                   ) -> None:
-        min_y, min_x = offset
-        for y in range(min_y, min_y + self.cell_size):
-            self._draw_horizental(screen, (y, min_x))
-
-    def _draw_vertical(self, screen: pygame.Surface, offset: tuple[int, int]
-                       ) -> None:
-        start_y, start_x = offset
-        max_y = start_y + self.cell_size
-        for x in range(start_x, start_x + 3):
-            for y in range(start_y, max_y):
-                screen.set_at((x, y), MAZE_COLOR)
-
-    def _draw_horizental(self, screen: pygame.Surface, offset: tuple[int, int]
-                         ) -> None:
-        start_y, start_x = offset
-        max_x = start_x + self.cell_size
-        for y in range(start_y, start_y + 3):
-            for x in range(start_x, max_x):
-                screen.set_at((x, y), MAZE_COLOR)
+                    segments.append(((left, bottom), (right, bottom)))
+        return segments
