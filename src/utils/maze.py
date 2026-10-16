@@ -1,10 +1,6 @@
 from mazegenerator import MazeGenerator
+from src.constants import EAST, NORTH, SOUTH, WEST
 from src.models.config import Config
-
-NORTH = 1
-EAST = 2
-SOUTH = 4
-WEST = 8
 
 
 class Maze:

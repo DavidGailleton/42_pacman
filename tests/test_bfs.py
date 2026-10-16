@@ -1,7 +1,7 @@
 """Tests for the BFS path search."""
 
 from src.utils.bfs import bfs
-from src.utils.maze import EAST, NORTH, SOUTH, WEST
+from src.constants import EAST, NORTH, SOUTH, WEST
 
 ALL = NORTH | EAST | SOUTH | WEST
 

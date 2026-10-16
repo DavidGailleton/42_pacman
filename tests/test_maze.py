@@ -6,7 +6,8 @@ import pytest
 
 from src.config_loader import load_config
 from src.models.config import Config
-from src.utils.maze import EAST, NORTH, SOUTH, WEST, Maze
+from src.constants import EAST, NORTH, SOUTH, WEST
+from src.utils.maze import Maze
 
 CONFIG_PATH = Path(__file__).resolve().parent.parent / "config.json"
 

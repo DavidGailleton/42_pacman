@@ -2,7 +2,7 @@
 
 from collections import deque
 
-from src.utils.maze import EAST, NORTH, SOUTH, WEST
+from src.constants import EAST, NORTH, SOUTH, WEST
 
 # A maze cell, as (x, y), same convention as ``Maze``.
 Cell = tuple[int, int]

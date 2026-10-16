@@ -1,5 +1,6 @@
 """Pygame window and main game object."""
 
+import math
 import os
 
 # SDL tries to create an OpenGL (GLX) context to accelerate the window
@@ -11,7 +12,9 @@ os.environ.setdefault("SDL_FRAMEBUFFER_ACCELERATION", "0")
 os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
 
 import pygame
+from src.constants import LEFT, RIGHT
 from src.renderer.maze_renderer import MazeRenderer
+from src.renderer.pacman_renderer import PacmanRenderer
 from src.utils.maze import Maze
 from src.models.config import Config
 
@@ -31,21 +34,31 @@ class Game:
         self.running = False
         self.maze = Maze(config=config)
         self.maze_renderer = MazeRenderer(self.maze, self.screen.get_size())
-
-        import time
-
-        time.sleep(2)
+        self.pacman_renderer = PacmanRenderer(self.maze,
+                                              self.screen.get_size())
 
     def __del__(self) -> None:
         """Shut pygame down when the game object is destroyed."""
         pygame.quit()
 
     def run(self) -> None:
+        """Run the main loop until the window is closed."""
         self.running = True
+        # TEMPORARY demo: Pac-Man slides around the maze center until
+        # the Pac-Man model and its movement exist.
+        width, height = self.maze.get_shape()
+        center_x, center_y = width // 2, height // 2
+        elapsed: float = 0.0
         while self.running:
+            dt = self.clock.tick(60) / 1000
+            elapsed += dt
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.running = False
+            demo_x = center_x + math.sin(elapsed)
+            direction = RIGHT if math.cos(elapsed) >= 0 else LEFT
+            self.pacman_renderer.update(dt)
             self.maze_renderer.draw(self.screen)
+            self.pacman_renderer.draw(self.screen, (demo_x, center_y),
+                                      direction)
             pygame.display.flip()
-            self.clock.tick(60)
