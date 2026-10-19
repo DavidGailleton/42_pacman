@@ -1,6 +1,7 @@
 from src.utils.maze import Maze
 from src.constants import WHITE_COLOR, HUD_MARGIN
 import pygame
+import math
 
 
 class HudRenderer:
@@ -11,8 +12,9 @@ class HudRenderer:
 
     def draw(self, screen: pygame.Surface, lives: int, score: int,
              time_left: float, lvl: int) -> None:
+        seconds = math.ceil(time_left)
         text = (f"LEVEL: {lvl} || SCORE: {score} || LIVES : {lives}"
-                f" || TIMER: {int(time_left)}")
+                f" || TIMER: {seconds // 60}:{seconds % 60:02d}")
         image = self.font.render(text, True, WHITE_COLOR)
         rect = image.get_rect(midtop=(self.screen_size[0] // 2, HUD_MARGIN))
         screen.blit(image, rect)

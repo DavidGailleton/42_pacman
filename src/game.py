@@ -65,6 +65,8 @@ class Game:
     def __init__(self, config: Config) -> None:
         """Initialise pygame, open the game window and place Pac-Man."""
         pygame.init()
+        self.config = config
+        self.time_left = self.config.level_max_time
         self.screen = pygame.display.set_mode((WIDTH_SIZE, HEIGHT_SIZE))
         self.clock = pygame.time.Clock()
         self.running = False
@@ -132,6 +134,7 @@ class Game:
                 self.score += self.eaten_ghost.eat()
                 self.eaten_ghost = None
             return
+        self._handle_time_left(dt)
         self._update_pacman()
         for ghost in self.ghosts:
             ghost.update_state(dt)
@@ -142,11 +145,17 @@ class Game:
         self._handle_collisions()
         self._eat_pacgum()
 
+    def _handle_time_left(self, dt: float) -> None:
+        self.time_left -= dt
+        if self.time_left <= 0:
+            self.time_left = 0
+            self.game_over = True
+
     def _draw(self) -> None:
         """Draw the maze, pacgums, Pac-Man and ghosts, then show it."""
         self.maze_renderer.draw(self.screen)
         self.hud_renderer.draw(screen=self.screen, lives=3, score=self.score,
-                               time_left=0, lvl=0)
+                               time_left=self.time_left, lvl=0)
         self.pacgum_renderer.draw(self.screen)
         self.pacman_renderer.draw(
             self.screen, self._pacman_position(), self.pacman_facing
