@@ -69,6 +69,7 @@ class Game:
         self.time_left = self.config.level_max_time
         self.score = 0
         self.lives = config.lives
+        self.level = 1
         self.screen = pygame.display.set_mode((WIDTH_SIZE, HEIGHT_SIZE))
         self.clock = pygame.time.Clock()
         self.running = False
@@ -155,9 +156,6 @@ class Game:
     def _draw(self) -> None:
         """Draw the maze, pacgums, Pac-Man and ghosts, then show it."""
         self.maze_renderer.draw(self.screen)
-        self.hud_renderer.draw(screen=self.screen,
-                               lives=self.lives, score=self.score,
-                               time_left=self.time_left, lvl=0)
         self.pacgum_renderer.draw(self.screen)
         self.pacman_renderer.draw(
             self.screen, self._pacman_position(), self.pacman_facing
@@ -169,6 +167,9 @@ class Game:
                 ghost.color,
                 ghost.state,
             )
+        self.hud_renderer.draw(screen=self.screen,
+                               lives=self.lives, score=self.score,
+                               time_left=self.time_left, lvl=self.level)
         pygame.display.flip()
 
     def _handle_collisions(self) -> None:
