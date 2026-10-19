@@ -10,6 +10,7 @@ from src.renderer.pacgum_renderer import PacgumRenderer
 from src.renderer.hud_renderer import HudRenderer
 from src.renderer.ghost_renderer import GhostRenderer
 from src.layouts.pause_menu import PauseMenu
+from src.layouts.end_screen import EndScreen
 import pygame
 from src.constants import (
     DOWN,
@@ -83,7 +84,9 @@ class Game(Layout):
         return self
 
     def update(self, dt: float) -> Layout | None:
-        self._update(dt)
+        tmp = self._update(dt)
+        if tmp is not None:
+            return tmp
         return self
 
     def draw(self, screen: pygame.Surface) -> None:
@@ -110,7 +113,7 @@ class Game(Layout):
             lvl=self.level
         )
 
-    def _update(self, dt: float) -> None:
+    def _update(self, dt: float) -> Layout | None:
         """Advance the game by one frame.
 
         Nothing moves after a game over, nor during the short freeze
@@ -120,7 +123,12 @@ class Game(Layout):
             dt: Seconds since the last frame.
         """
         if self.game_over:
-            return
+            return EndScreen(
+                config=self.config,
+                screen_size=self.screen_size,
+                score=self.score,
+                win=False
+            )
         if self.freeze_timer > 0:
             self.freeze_timer -= dt
             if self.freeze_timer <= 0 and self.eaten_ghost is not None:
