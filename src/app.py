@@ -4,7 +4,7 @@ from src.constants import (
     WIDTH_SIZE,
     HEIGHT_SIZE, FPS
 )
-from src.layouts.game import Game
+from src.layouts.main_menu import MainMenu
 import pygame
 
 
@@ -14,7 +14,7 @@ class App:
         self.screen = pygame.display.set_mode((WIDTH_SIZE, HEIGHT_SIZE))
         self.clock = pygame.time.Clock()
         self.config = config
-        self.layout: Layout | None = Game(
+        self.layout: Layout | None = MainMenu(
             config=config,
             screen_size=self.screen.get_size()
         )
