@@ -78,3 +78,7 @@ EAT_FREEZE_TIME: float = 0.2
 
 # Const hud
 HUD_MARGIN: int = 20
+
+# SIZE SCREEN
+WIDTH_SIZE = 1920
+HEIGHT_SIZE = 1080
