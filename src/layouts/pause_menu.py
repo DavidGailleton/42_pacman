@@ -1,7 +1,13 @@
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 from src.layouts.layout import Layout
-from src.layouts.game import Game
 from src.layouts.menu import Menu
 import pygame
+
+if TYPE_CHECKING:
+    from src.layouts.game import Game
 
 
 class PauseMenu(Layout):
@@ -11,7 +17,9 @@ class PauseMenu(Layout):
 
     def handle_event(self, event: pygame.event.Event) -> Layout | None:
         choice = self.menu.handle_event(event)
-        if choice == "Resume":
+        if event.type != pygame.KEYDOWN:
+            return None
+        if choice == "Resume" or event.key == pygame.K_ESCAPE:
             return self.game
         elif choice == "Main menu":
             return None

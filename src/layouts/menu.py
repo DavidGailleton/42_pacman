@@ -14,11 +14,11 @@ class Menu:
         self.font = pygame.font.Font(None, MENU_FONT_SIZE)
 
     def handle_event(self, event: pygame.event.Event) -> str | None:
-        if event != pygame.KEYDOWN:
+        if event.type != pygame.KEYDOWN:
             return None
-        if event.key in (pygame.K_UP):
+        if event.key in (pygame.K_UP, pygame.K_w):
             self.selected = (self.selected - 1) % len(self.options)
-        elif event.key in (pygame.K_DOWN):
+        elif event.key in (pygame.K_DOWN, pygame.K_s):
             self.selected = (self.selected + 1) % len(self.options)
         elif event.key == pygame.K_RETURN:
             return self.options[self.selected]
@@ -26,7 +26,7 @@ class Menu:
 
     def draw(self, screen: pygame.Surface) -> None:
         center_x = screen.get_width() // 2
-        tot_height = len(self.options - 1) * MENU_LINE_SPACING
+        tot_height = (len(self.options) - 1) * MENU_LINE_SPACING
         start_y = screen.get_height() // 2 - tot_height // 2
         for index, option in enumerate(self.options):
             if index == self.selected:
@@ -37,6 +37,6 @@ class Menu:
                 color = WHITE_COLOR
             image = self.font.render(text, True, color)
             rect = image.get_rect(
-                center=(center_x, start_y + index * MENU_LINE_SPACING)
+                center=(center_x, start_y + index * MENU_FONT_SIZE)
             )
             screen.blit(image, rect)

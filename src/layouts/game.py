@@ -9,6 +9,7 @@ from src.renderer.pacman_renderer import PacmanRenderer
 from src.renderer.pacgum_renderer import PacgumRenderer
 from src.renderer.hud_renderer import HudRenderer
 from src.renderer.ghost_renderer import GhostRenderer
+from src.layouts.pause_menu import PauseMenu
 import pygame
 from src.constants import (
     DOWN,
@@ -76,6 +77,8 @@ class Game(Layout):
 
     def handle_event(self, event: pygame.event.Event) -> Layout | None:
         if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                return (PauseMenu(game=self))
             self._handle_key(event.key)
         return self
 
