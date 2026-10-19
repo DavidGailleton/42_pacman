@@ -4,16 +4,20 @@ from src.constants import (
     WIDTH_SIZE,
     HEIGHT_SIZE, FPS
 )
+from src.layouts.game import Game
 import pygame
 
 
 class App:
     def __init__(self, config: Config) -> None:
         pygame.init()
-        self.screen = pygame.display.set_mode(WIDTH_SIZE, HEIGHT_SIZE)
+        self.screen = pygame.display.set_mode((WIDTH_SIZE, HEIGHT_SIZE))
         self.clock = pygame.time.Clock()
         self.config = config
-        self.layout: Layout | None = None
+        self.layout: Layout | None = Game(
+            config=config,
+            screen_size=self.screen.get_size()
+        )
 
     def run(self) -> None:
         while self.layout is not None:

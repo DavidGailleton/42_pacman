@@ -82,3 +82,6 @@ HUD_MARGIN: int = 20
 # SIZE SCREEN
 WIDTH_SIZE = 1920
 HEIGHT_SIZE = 1080
+
+# Seconds the ghosts stay edible after a super-pacgum is eaten.
+FRIGHTEN_TIME: float = 7.0
