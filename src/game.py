@@ -67,10 +67,11 @@ class Game:
         pygame.init()
         self.config = config
         self.time_left = self.config.level_max_time
+        self.score = 0
+        self.lives = config.lives
         self.screen = pygame.display.set_mode((WIDTH_SIZE, HEIGHT_SIZE))
         self.clock = pygame.time.Clock()
         self.running = False
-        self.score = 0
         self.maze = Maze(config=config)
         self.pacgum = Pacgum(self.maze, config)
         self.maze_renderer = MazeRenderer(self.maze, self.screen.get_size())
@@ -154,7 +155,8 @@ class Game:
     def _draw(self) -> None:
         """Draw the maze, pacgums, Pac-Man and ghosts, then show it."""
         self.maze_renderer.draw(self.screen)
-        self.hud_renderer.draw(screen=self.screen, lives=3, score=self.score,
+        self.hud_renderer.draw(screen=self.screen,
+                               lives=self.lives, score=self.score,
                                time_left=self.time_left, lvl=0)
         self.pacgum_renderer.draw(self.screen)
         self.pacman_renderer.draw(
@@ -180,7 +182,7 @@ class Game:
         # Chasers first: touching one loses, even if a frightened
         # ghost is touched on the same frame.
         if any(ghost.state is GhostState.CHASE for ghost in ghosts):
-            self.game_over = True
+            self._lose_life()
             return
         for ghost in ghosts:
             if ghost.state is GhostState.FRIGHTENED:
@@ -189,6 +191,24 @@ class Game:
                 self.eaten_ghost = ghost
                 self.freeze_timer = EAT_FREEZE_TIME
                 return
+
+    def _lose_life(self) -> None:
+        self.lives -= 1
+        if self.lives == 0:
+            self.game_over = True
+            return
+        self._reset_position()
+        self.freeze_timer = EAT_FREEZE_TIME
+
+    def _reset_position(self) -> None:
+        self.pacman_cell = self._find_start_cell()
+        self.pacman_step = 0
+        self.current_move = None
+        self.next_move = None
+        self.pacman_facing = RIGHT
+        self.eaten_ghost = None
+        for ghost in self.ghosts:
+            ghost.reset()
 
     def _make_ghosts(self, config: Config) -> list[Ghost]:
         """Place one ghost in each corner of the maze.
