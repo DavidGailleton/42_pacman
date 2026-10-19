@@ -1,44 +1,28 @@
-"""Pygame window and main game object."""
-
-import os
-
+from src.layouts.layout import Layout
+from src.models.config import Config
+from src.utils.maze import Maze
+from src.models.pacgum import Pacgum
+from src.ghost_ai import Blinky, Clyde, Ghost, GhostState, Inky, Pinky
+from src.utils.collision import is_colliding
+from src.renderer.maze_renderer import MazeRenderer
+from src.renderer.pacman_renderer import PacmanRenderer
+from src.renderer.pacgum_renderer import PacgumRenderer
+from src.renderer.hud_renderer import HudRenderer
+from src.renderer.ghost_renderer import GhostRenderer
+from src.layouts.pause_menu import PauseMenu
+from src.layouts.end_screen import EndScreen
 import pygame
 from src.constants import (
     DOWN,
     EAT_FREEZE_TIME,
-    FPS,
     LEFT,
     PACMAN_FRAMES_PER_CELL,
     RIGHT,
     UP,
+    FRIGHTEN_TIME,
     Direction,
 )
-from src.ghost_ai import Blinky, Clyde, Ghost, GhostState, Inky, Pinky
-from src.renderer.ghost_renderer import GhostRenderer
-from src.renderer.maze_renderer import MazeRenderer
-from src.renderer.pacman_renderer import PacmanRenderer
-from src.utils.collision import is_colliding
-from src.utils.maze import Maze
-from src.models.config import Config
-from src.renderer.pacgum_renderer import PacgumRenderer
-from src.models.pacgum import Pacgum
 
-# SDL tries to create an OpenGL (GLX) context to accelerate the window
-# surface. On some machines (broken/missing GL drivers, remote X) this
-# triggers a fatal X11 error that kills the process before Python can
-# catch it. Forcing the plain software framebuffer avoids GLX entirely.
-# Must be set before pygame initialises the display.
-os.environ.setdefault("SDL_FRAMEBUFFER_ACCELERATION", "0")
-os.environ.setdefault("PYGAME_HIDE_SUPPORT_PROMPT", "1")
-
-
-WIDTH_SIZE = 1920
-HEIGHT_SIZE = 1080
-
-# Seconds the ghosts stay edible after a super-pacgum is eaten.
-FRIGHTEN_TIME: float = 7.0
-
-# Keys that move Pac-Man: arrows and WASD.
 KEY_TO_DIRECTION: dict[int, Direction] = {
     pygame.K_UP: UP,
     pygame.K_w: UP,
@@ -51,69 +35,85 @@ KEY_TO_DIRECTION: dict[int, Direction] = {
 }
 
 
-class Game:
-    """Own the pygame window, the clock and Pac-Man's movement.
-
-    Pac-Man's position is stored as the last cell center reached
-    (``pacman_cell``) plus the number of frames already done toward the
-    next cell (``pacman_step``). Storing whole steps instead of a float
-    avoids rounding drift: after ``PACMAN_FRAMES_PER_CELL`` frames
-    Pac-Man is exactly on the next cell center.
-    """
-
-    def __init__(self, config: Config) -> None:
-        """Initialise pygame, open the game window and place Pac-Man."""
-        pygame.init()
-        self.screen = pygame.display.set_mode((WIDTH_SIZE, HEIGHT_SIZE))
-        self.clock = pygame.time.Clock()
-        self.running = False
+class Game(Layout):
+    def __init__(self, config: Config, screen_size: tuple[int, int]) -> None:
+        self.config = config
+        self.time_left = config.level_max_time
         self.score = 0
+        self.lives = config.lives
+        self.level = 1
+        self.screen_size = screen_size
         self.maze = Maze(config=config)
-        self.pacgum = Pacgum(self.maze, config)
-        self.maze_renderer = MazeRenderer(self.maze, self.screen.get_size())
-        self.pacman_renderer = PacmanRenderer(
-            self.maze, self.screen.get_size()
+        self.pacgum = Pacgum(maze=self.maze, config=config)
+        self.maze_renderer = MazeRenderer(
+            maze=self.maze,
+            screen_size=self.screen_size
         )
-        self.ghost_renderer = GhostRenderer(self.maze, self.screen.get_size())
-        self.ghosts: list[Ghost] = self._make_ghosts(config)
-
-        self.pacgum_renderer = PacgumRenderer(self.pacgum,
-                                              self.screen.get_size(),
-                                              self.maze)
-
+        self.pacgum_renderer = PacgumRenderer(
+            pacgum=self.pacgum,
+            screen_size=self.screen_size,
+            maze=self.maze
+        )
+        self.pacman_renderer = PacmanRenderer(
+            maze=self.maze,
+            screen_size=self.screen_size
+        )
+        self.ghost_renderer = GhostRenderer(
+            maze=self.maze,
+            screen_size=self.screen_size
+        )
+        self.hud_renderer = HudRenderer(
+            maze=self.maze,
+            screen_size=self.screen_size
+        )
+        self.ghosts: list[Ghost] = self._make_ghosts(config=config)
         self.pacman_cell: tuple[int, int] = self._find_start_cell()
-        self.pacman_step: int = 0
-        # Move being done, and move waiting until it becomes possible.
+        self.pacman_step = 0
         self.current_move: Direction | None = None
         self.next_move: Direction | None = None
-        # Direction drawn, kept when Pac-Man stops.
         self.pacman_facing: Direction = RIGHT
-
-        # A chasing ghost caught Pac-Man: nothing moves anymore.
         self.game_over: bool = False
-        # Seconds of freeze left after Pac-Man ate a ghost, and that
-        # ghost, sent to its corner when the freeze ends.
         self.freeze_timer: float = 0.0
         self.eaten_ghost: Ghost | None = None
 
-    def __del__(self) -> None:
-        """Shut pygame down when the game object is destroyed."""
-        pygame.quit()
+    def handle_event(self, event: pygame.event.Event) -> Layout | None:
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_ESCAPE:
+                return (PauseMenu(game=self))
+            self._handle_key(event.key)
+        return self
 
-    def run(self) -> None:
-        """Run the main loop until the window is closed."""
-        self.running = True
-        while self.running:
-            dt = self.clock.tick(FPS) / 1000
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    self.running = False
-                elif event.type == pygame.KEYDOWN:
-                    self._handle_key(event.key)
-            self._update(dt)
-            self._draw()
+    def update(self, dt: float) -> Layout | None:
+        tmp = self._update(dt)
+        if tmp is not None:
+            return tmp
+        return self
 
-    def _update(self, dt: float) -> None:
+    def draw(self, screen: pygame.Surface) -> None:
+        self.maze_renderer.draw(screen=screen)
+        self.pacgum_renderer.draw(screen=screen)
+        self.pacman_renderer.draw(
+            screen=screen,
+            position=self._pacman_position(),
+            direction=self.pacman_facing
+        )
+        for ghost in self.ghosts:
+            self.ghost_renderer.draw(
+                screen=screen,
+                position=ghost.float_position(),
+                color=ghost.color,
+                state=ghost.state
+
+            )
+        self.hud_renderer.draw(
+            screen=screen,
+            lives=self.lives,
+            score=self.score,
+            time_left=self.time_left,
+            lvl=self.level
+        )
+
+    def _update(self, dt: float) -> Layout | None:
         """Advance the game by one frame.
 
         Nothing moves after a game over, nor during the short freeze
@@ -123,13 +123,19 @@ class Game:
             dt: Seconds since the last frame.
         """
         if self.game_over:
-            return
+            return EndScreen(
+                config=self.config,
+                screen_size=self.screen_size,
+                score=self.score,
+                win=False
+            )
         if self.freeze_timer > 0:
             self.freeze_timer -= dt
             if self.freeze_timer <= 0 and self.eaten_ghost is not None:
                 self.score += self.eaten_ghost.eat()
                 self.eaten_ghost = None
             return
+        self._handle_time_left(dt)
         self._update_pacman()
         for ghost in self.ghosts:
             ghost.update_state(dt)
@@ -140,42 +146,17 @@ class Game:
         self._handle_collisions()
         self._eat_pacgum()
 
-    def _draw(self) -> None:
-        """Draw the maze, pacgums, Pac-Man and ghosts, then show it."""
-        self.maze_renderer.draw(self.screen)
-        self.pacgum_renderer.draw(self.screen)
-        self.pacman_renderer.draw(
-            self.screen, self._pacman_position(), self.pacman_facing
-        )
-        for ghost in self.ghosts:
-            self.ghost_renderer.draw(
-                self.screen,
-                ghost.float_position(),
-                ghost.color,
-                ghost.state,
-            )
-        pygame.display.flip()
+    def _handle_key(self, key: int) -> None:
+        """Remember the move asked by a key press.
 
-    def _handle_collisions(self) -> None:
-        """React to Pac-Man touching ghosts.
+        The move replaces any move already in memory. It is applied by
+        ``_update_pacman`` as soon as it is possible.
 
-        A chasing ghost ends the game. A frightened ghost is eaten: the
-        game freezes a moment, then the ghost goes to its corner. Eaten
-        ghosts are ignored (see ``_colliding_ghosts``).
+        Args:
+            key: Pygame key code of the pressed key.
         """
-        ghosts = self._colliding_ghosts()
-        # Chasers first: touching one loses, even if a frightened
-        # ghost is touched on the same frame.
-        if any(ghost.state is GhostState.CHASE for ghost in ghosts):
-            self.game_over = True
-            return
-        for ghost in ghosts:
-            if ghost.state is GhostState.FRIGHTENED:
-                # One ghost per freeze: another one still touching is
-                # caught on the frame after this freeze ends.
-                self.eaten_ghost = ghost
-                self.freeze_timer = EAT_FREEZE_TIME
-                return
+        if key in KEY_TO_DIRECTION:
+            self.next_move = KEY_TO_DIRECTION[key]
 
     def _make_ghosts(self, config: Config) -> list[Ghost]:
         """Place one ghost in each corner of the maze.
@@ -189,6 +170,51 @@ class Game:
         inky = Inky((0, height - 1), self.maze, blinky, config)
         clyde = Clyde((width - 1, height - 1), self.maze, config)
         return [blinky, pinky, inky, clyde]
+
+    def _handle_time_left(self, dt: float) -> None:
+        self.time_left -= dt
+        if self.time_left <= 0:
+            self.time_left = 0
+            self.game_over = True
+
+    def _handle_collisions(self) -> None:
+        """React to Pac-Man touching ghosts.
+
+        A chasing ghost ends the game. A frightened ghost is eaten: the
+        game freezes a moment, then the ghost goes to its corner. Eaten
+        ghosts are ignored (see ``_colliding_ghosts``).
+        """
+        ghosts = self._colliding_ghosts()
+        # Chasers first: touching one loses, even if a frightened
+        # ghost is touched on the same frame.
+        if any(ghost.state is GhostState.CHASE for ghost in ghosts):
+            self._lose_life()
+            return
+        for ghost in ghosts:
+            if ghost.state is GhostState.FRIGHTENED:
+                # One ghost per freeze: another one still touching is
+                # caught on the frame after this freeze ends.
+                self.eaten_ghost = ghost
+                self.freeze_timer = EAT_FREEZE_TIME
+                return
+
+    def _lose_life(self) -> None:
+        self.lives -= 1
+        if self.lives == 0:
+            self.game_over = True
+            return
+        self._reset_position()
+        self.freeze_timer = EAT_FREEZE_TIME
+
+    def _reset_position(self) -> None:
+        self.pacman_cell = self._find_start_cell()
+        self.pacman_step = 0
+        self.current_move = None
+        self.next_move = None
+        self.pacman_facing = RIGHT
+        self.eaten_ghost = None
+        for ghost in self.ghosts:
+            ghost.reset()
 
     def _colliding_ghosts(self) -> list[Ghost]:
         """List the ghosts Pac-Man is touching.
@@ -235,18 +261,6 @@ class Game:
             if not self.maze.is_closed(cell):
                 return cell
         return (0, 0)
-
-    def _handle_key(self, key: int) -> None:
-        """Remember the move asked by a key press.
-
-        The move replaces any move already in memory. It is applied by
-        ``_update_pacman`` as soon as it is possible.
-
-        Args:
-            key: Pygame key code of the pressed key.
-        """
-        if key in KEY_TO_DIRECTION:
-            self.next_move = KEY_TO_DIRECTION[key]
 
     def _update_pacman(self) -> None:
         """Move Pac-Man by one frame."""

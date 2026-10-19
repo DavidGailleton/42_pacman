@@ -1,6 +1,6 @@
 """Main entry point for the project."""
 
-from src.game import Game
+from src.app import App
 
 
 def greet(name: str) -> str:
@@ -39,10 +39,8 @@ def main() -> int:
             print(f"Error: {error}")
             return 1
 
-        print(config)
-
-        game = Game(config=config)
-        game.run()
+        app = App(config=config)
+        app.run()
 
         return 0
     except KeyboardInterrupt:

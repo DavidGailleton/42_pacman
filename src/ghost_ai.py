@@ -94,6 +94,13 @@ class Ghost(ABC):
             The cell the ghost wants to reach.
         """
 
+    def reset(self) -> None:
+        self.position = self.corner
+        self.direction = None
+        self.step = 0
+        self.state = GhostState.CHASE
+        self._timer = 0.0
+
     def target(self, pacman: Cell, pacman_direction: Cell) -> Cell:
         """Choose the cell to move towards, depending on the state.
 
