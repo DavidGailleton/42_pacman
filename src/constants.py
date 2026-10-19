@@ -24,6 +24,7 @@ MAZE_SCREEN_RATIO: float = 0.8
 BLACK_COLOR: Color = (0, 0, 0)
 MAZE_COLOR: Color = (33, 33, 222)
 PACMAN_COLOR: Color = (255, 255, 0)
+WHITE_COLOR: Color = (255, 255, 255)
 
 # Body color of each ghost, in chase mode.
 BLINKY_COLOR: Color = (255, 0, 0)
@@ -74,3 +75,6 @@ COLLISION_DISTANCE: float = 0.5
 
 # Seconds the game freezes when Pac-Man eats a ghost.
 EAT_FREEZE_TIME: float = 0.2
+
+# Const hud
+HUD_MARGIN: int = 20

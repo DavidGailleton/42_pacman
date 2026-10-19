@@ -22,6 +22,7 @@ from src.utils.maze import Maze
 from src.models.config import Config
 from src.renderer.pacgum_renderer import PacgumRenderer
 from src.models.pacgum import Pacgum
+from src.renderer.hud_renderer import HudRenderer
 
 # SDL tries to create an OpenGL (GLX) context to accelerate the window
 # surface. On some machines (broken/missing GL drivers, remote X) this
@@ -80,6 +81,7 @@ class Game:
         self.pacgum_renderer = PacgumRenderer(self.pacgum,
                                               self.screen.get_size(),
                                               self.maze)
+        self.hud_renderer = HudRenderer(self.maze, self.screen.get_size())
 
         self.pacman_cell: tuple[int, int] = self._find_start_cell()
         self.pacman_step: int = 0
@@ -143,6 +145,8 @@ class Game:
     def _draw(self) -> None:
         """Draw the maze, pacgums, Pac-Man and ghosts, then show it."""
         self.maze_renderer.draw(self.screen)
+        self.hud_renderer.draw(screen=self.screen, lives=3, score=self.score,
+                               time_left=0, lvl=0)
         self.pacgum_renderer.draw(self.screen)
         self.pacman_renderer.draw(
             self.screen, self._pacman_position(), self.pacman_facing
