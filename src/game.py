@@ -75,7 +75,7 @@ class Game:
             self.maze, self.screen.get_size()
         )
         self.ghost_renderer = GhostRenderer(self.maze, self.screen.get_size())
-        self.ghosts: list[Ghost] = self._make_ghosts()
+        self.ghosts: list[Ghost] = self._make_ghosts(config)
 
         self.pacgum_renderer = PacgumRenderer(self.pacgum,
                                               self.screen.get_size(),
@@ -127,7 +127,7 @@ class Game:
         if self.freeze_timer > 0:
             self.freeze_timer -= dt
             if self.freeze_timer <= 0 and self.eaten_ghost is not None:
-                self.eaten_ghost.eat()
+                self.score += self.eaten_ghost.eat()
                 self.eaten_ghost = None
             return
         self._update_pacman()
@@ -177,17 +177,17 @@ class Game:
                 self.freeze_timer = EAT_FREEZE_TIME
                 return
 
-    def _make_ghosts(self) -> list[Ghost]:
+    def _make_ghosts(self, config: Config) -> list[Ghost]:
         """Place one ghost in each corner of the maze.
 
         Returns:
             The four ghosts.
         """
         width, height = self.maze.get_shape()
-        blinky = Blinky((0, 0), self.maze)
-        pinky = Pinky((width - 1, 0), self.maze)
-        inky = Inky((0, height - 1), self.maze, blinky)
-        clyde = Clyde((width - 1, height - 1), self.maze)
+        blinky = Blinky((0, 0), self.maze, config)
+        pinky = Pinky((width - 1, 0), self.maze, config)
+        inky = Inky((0, height - 1), self.maze, blinky, config)
+        clyde = Clyde((width - 1, height - 1), self.maze, config)
         return [blinky, pinky, inky, clyde]
 
     def _colliding_ghosts(self) -> list[Ghost]:
@@ -209,7 +209,6 @@ class Game:
     def _eat_pacgum(self) -> None:
         superman, point = self.pacgum.eat(self.pacman_cell)
         self.score += point
-        print(self.score)
         if superman:
             for ghost in self.ghosts:
                 ghost.frighten(FRIGHTEN_TIME)

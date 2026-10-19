@@ -2,6 +2,7 @@
 
 from abc import ABC, abstractmethod
 from enum import Enum
+from src.models.config import Config
 
 from src.constants import (
     BLINKY_COLOR,
@@ -64,7 +65,7 @@ class Ghost(ABC):
 
     color: Color
 
-    def __init__(self, corner: Cell, maze: Maze) -> None:
+    def __init__(self, corner: Cell, maze: Maze, config: Config) -> None:
         """Place the ghost in its corner, in chase mode.
 
         Args:
@@ -78,6 +79,7 @@ class Ghost(ABC):
         self.step: int = 0
         self.state: GhostState = GhostState.CHASE
         self._timer: float = 0.0
+        self.point = config.point_per_ghost
 
     @abstractmethod
     def chase_target(self, pacman: Cell, pacman_direction: Cell) -> Cell:
@@ -311,13 +313,14 @@ class Ghost(ABC):
         self.state = GhostState.FRIGHTENED
         self._timer = duration
 
-    def eat(self) -> None:
+    def eat(self) -> int:
         """Send the ghost back to its corner after Pac-Man ate it."""
         self.state = GhostState.EATEN
         self.position = self.corner
         self.direction = None
         self.step = 0
         self._timer = RESPAWN_DELAY
+        return self.point
 
     def update_state(self, delta: float) -> None:
         """Count down the current timer and go back to chase mode.
@@ -385,7 +388,8 @@ class Inky(Ghost):
 
     color = INKY_COLOR
 
-    def __init__(self, corner: Cell, maze: Maze, blinky: Blinky) -> None:
+    def __init__(self, corner: Cell, maze: Maze, blinky: Blinky,
+                 config: Config) -> None:
         """Place Inky in its corner and remember Blinky.
 
         Args:
@@ -393,7 +397,7 @@ class Inky(Ghost):
             maze: Maze the ghost moves in.
             blinky: The Blinky ghost used to compute the target.
         """
-        super().__init__(corner, maze)
+        super().__init__(corner, maze, config)
         self.blinky: Blinky = blinky
 
     def chase_target(self, pacman: Cell, pacman_direction: Cell) -> Cell:
