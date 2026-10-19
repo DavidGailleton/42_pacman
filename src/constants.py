@@ -85,3 +85,7 @@ HEIGHT_SIZE = 1080
 
 # Seconds the ghosts stay edible after a super-pacgum is eaten.
 FRIGHTEN_TIME: float = 7.0
+
+# PARAMETERS FOR THE MENU
+MENU_LINE_SPACING = 8
+MENU_FONT_SIZE = 64
