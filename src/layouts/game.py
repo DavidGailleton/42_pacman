@@ -71,6 +71,9 @@ class Game(Layout):
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 return PauseMenu(game=self)
+            if event.key == pygame.K_c:
+                self.cheat_mode = not self.cheat_mode
+                return self
             self._handle_key(event.key)
         return self
 
@@ -178,7 +181,7 @@ class Game(Layout):
         # Chasers first: touching one loses, even if a frightened
         # ghost is touched on the same frame.
         if any(
-            ghost.state is GhostState.CHASE and self.cheat_mode == False
+            ghost.state is GhostState.CHASE and not self.cheat_mode
             for ghost in ghosts
         ):
             self._lose_life()
