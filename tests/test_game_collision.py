@@ -5,10 +5,14 @@ import os
 # No real window during tests: must be set before pygame opens one.
 os.environ.setdefault("SDL_VIDEODRIVER", "dummy")
 
+import pygame  # noqa: E402
+
 from src.constants import EAT_FREEZE_TIME  # noqa: E402
-from src.game import Game  # noqa: E402
+from src.layouts.game import Game  # noqa: E402
 from src.ghost_ai import Ghost, GhostState  # noqa: E402
 from src.models.config import Config  # noqa: E402
+
+SCREEN_SIZE = (800, 600)
 
 
 def make_game_with_ghost_on_pacman(state: GhostState) -> tuple[Game, Ghost]:
@@ -20,7 +24,8 @@ def make_game_with_ghost_on_pacman(state: GhostState) -> tuple[Game, Ghost]:
     Returns:
         The game and the ghost touching Pac-Man.
     """
-    game = Game(Config())
+    pygame.init()
+    game = Game(Config(), SCREEN_SIZE)
     ghost = game.ghosts[0]
     ghost.position = game.pacman_cell
     ghost.direction = None
@@ -29,9 +34,19 @@ def make_game_with_ghost_on_pacman(state: GhostState) -> tuple[Game, Ghost]:
     return game, ghost
 
 
-def test_chasing_ghost_ends_game() -> None:
-    """A chasing ghost stops the game: nothing moves afterwards."""
+def test_chasing_ghost_takes_a_life() -> None:
+    """A chasing ghost costs a life, the game goes on."""
     game, ghost = make_game_with_ghost_on_pacman(GhostState.CHASE)
+    lives = game.lives
+    game._handle_collisions()
+    assert game.lives == lives - 1
+    assert not game.game_over
+
+
+def test_chasing_ghost_on_last_life_ends_game() -> None:
+    """On the last life, a chasing ghost stops the game."""
+    game, ghost = make_game_with_ghost_on_pacman(GhostState.CHASE)
+    game.lives = 1
     game._handle_collisions()
     assert game.game_over
     other = game.ghosts[1]

@@ -37,13 +37,31 @@ KEY_TO_DIRECTION: dict[int, Direction] = {
 
 class Game(Layout):
     def __init__(self, config: Config, screen_size: tuple[int, int]) -> None:
+        # Kept for the whole game: never reset between levels.
         self.config = config
-        self.time_left: float = config.level_max_time
+        self.screen_size = screen_size
         self.score = 0
         self.lives = config.lives
         self.level = 1
-        self.screen_size = screen_size
-        self.maze = Maze(config=config)
+        self.game_over: bool = False
+        self.won: bool = False
+        self.cheat_mode: bool = False
+        self._load_level()
+
+    def _load_level(self) -> None:
+        """Build a new maze and put everything at its start position.
+
+        Level n uses the size of the n-th entry of ``levels`` and the
+        config seed plus n - 1, so every level can be replayed.
+        Score and lives are not touched: they carry over.
+        """
+        config = self.config
+        level = config.levels[self.level - 1]
+        self.time_left: float = config.level_max_time
+        self.maze = Maze(
+            shape=(level.width, level.height),
+            seed=config.seed + self.level - 1,
+        )
         self.pacgum = Pacgum(maze=self.maze, config=config)
         self.maze_renderer = MazeRenderer(
             maze=self.maze, screen_size=self.screen_size
@@ -66,10 +84,16 @@ class Game(Layout):
         self.current_move: Direction | None = None
         self.next_move: Direction | None = None
         self.pacman_facing: Direction = RIGHT
-        self.game_over: bool = False
         self.freeze_timer: float = 0.0
         self.eaten_ghost: Ghost | None = None
-        self.cheat_mode: bool = False
+
+    def _next_level(self) -> None:
+        """Go to the next level, or win the game after the last one."""
+        if self.level >= len(self.config.levels):
+            self.won = True
+            return
+        self.level += 1
+        self._load_level()
 
     def handle_event(self, event: pygame.event.Event) -> Layout | None:
         if event.type == pygame.KEYDOWN:
@@ -119,13 +143,16 @@ class Game(Layout):
 
         Args:
             dt: Seconds since the last frame.
+
+        Returns:
+            The end screen once the game is lost or won, else None.
         """
-        if self.game_over:
+        if self.game_over or self.won:
             return EndScreen(
                 config=self.config,
                 screen_size=self.screen_size,
                 score=self.score,
-                win=False,
+                win=self.won,
             )
         if self.freeze_timer > 0:
             self.freeze_timer -= dt
@@ -133,7 +160,9 @@ class Game(Layout):
                 self.score += self.eaten_ghost.eat()
                 self.eaten_ghost = None
             return None
-        self._handle_time_left(dt)
+        if self._handle_time_left(dt):
+            # New level just loaded: start moving on the next frame.
+            return None
         self._update_pacman()
         for ghost in self.ghosts:
             ghost.update_state(dt)
@@ -170,11 +199,22 @@ class Game(Layout):
         clyde = Clyde((width - 1, height - 1), self.maze, config)
         return [blinky, pinky, inky, clyde]
 
-    def _handle_time_left(self, dt: float) -> None:
+    def _handle_time_left(self, dt: float) -> bool:
+        """Count down the level timer.
+
+        Surviving until the end of the timer wins the level.
+
+        Args:
+            dt: Seconds since the last frame.
+
+        Returns:
+            True if the time is up (the level is won).
+        """
         self.time_left -= dt
-        if self.time_left <= 0:
-            self.time_left = 0
-            self.game_over = True
+        if self.time_left > 0:
+            return False
+        self._next_level()
+        return True
 
     def _handle_collisions(self) -> None:
         """React to Pac-Man touching ghosts.
@@ -235,13 +275,17 @@ class Game(Layout):
         ]
 
     def _eat_pacgum(self) -> None:
+        """Eat the pacgum under Pac-Man, if any.
+
+        Eating the last pacgum wins the level.
+        """
         superman, point = self.pacgum.eat(self.pacman_cell)
         self.score += point
         if superman:
             for ghost in self.ghosts:
                 ghost.frighten(FRIGHTEN_TIME)
         if self.pacgum.is_empty():
-            pass
+            self._next_level()
 
     def _find_start_cell(self) -> tuple[int, int]:
         """Find the cell closest to the maze center that can be entered.

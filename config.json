@@ -1,15 +1,56 @@
 # Pac-Man configuration file (lines starting with # are ignored)
 {
   "highscore_filename": "highscores.json",
-  "shape": [
-    15,
-    15
+  # One maze size per level, played in order (at least one level).
+  # width and height must be between 10 and 100.
+  "levels": [
+    {
+      "width": 15,
+      "height": 15
+    },
+    {
+      "width": 12,
+      "height": 10
+    },
+    {
+      "width": 20,
+      "height": 14
+    },
+    {
+      "width": 10,
+      "height": 10
+    },
+    {
+      "width": 25,
+      "height": 15
+    },
+    {
+      "width": 18,
+      "height": 18
+    },
+    {
+      "width": 30,
+      "height": 20
+    },
+    {
+      "width": 14,
+      "height": 22
+    },
+    {
+      "width": 21,
+      "height": 21
+    },
+    {
+      "width": 28,
+      "height": 16
+    }
   ],
   # Number of lives at the start of the game
   "lives": 3,
   "point_per_pacgum": 10,
   "point_per_super_pacgum": 50,
   "point_per_ghost": 200,
+  # Seed of level 1; level n uses seed + n - 1
   "seed": 42,
-  "level_max_time": 90
+  "level_max_time": 30
 }

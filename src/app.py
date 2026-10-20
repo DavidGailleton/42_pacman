@@ -1,6 +1,6 @@
 from src.models.config import Config
 from src.layouts.layout import Layout
-from src.constants import WIDTH_SIZE, HEIGHT_SIZE, FPS
+from src.constants import WIDTH_SIZE, HEIGHT_SIZE, FPS, FRAME_TIME
 from src.layouts.main_menu import MainMenu
 import pygame
 
@@ -17,7 +17,7 @@ class App:
 
     def run(self) -> None:
         while self.layout is not None:
-            dt = self.clock.tick(FPS) / 1000
+            self.clock.tick(FPS)
             for event in pygame.event.get():
                 if event.type == pygame.QUIT:
                     self.layout = None
@@ -27,7 +27,7 @@ class App:
                     self.layout = next_layout
             if self.layout is None:
                 break
-            next_layout = self.layout.update(dt)
+            next_layout = self.layout.update(FRAME_TIME)
             if next_layout is not None:
                 self.layout = next_layout
             self.layout.draw(self.screen)
