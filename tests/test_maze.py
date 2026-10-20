@@ -20,8 +20,9 @@ def config() -> Config:
 
 @pytest.fixture
 def maze(config: Config) -> Maze:
-    """Build a maze from the original configuration."""
-    return Maze(config, config.seed)
+    """Build the first level's maze from the original configuration."""
+    level = config.levels[0]
+    return Maze((level.width, level.height), config.seed)
 
 
 def all_cells(maze: Maze) -> list[tuple[int, int]]:
@@ -32,9 +33,9 @@ def all_cells(maze: Maze) -> list[tuple[int, int]]:
 
 def test_shape_matches_config(maze: Maze, config: Config) -> None:
     """The grid has `height` rows of `width` cells, as set in the config."""
-    width, height = config.shape
+    width, height = config.levels[0].width, config.levels[0].height
     grid = maze.get_maze()
-    assert maze.get_shape() == config.shape
+    assert maze.get_shape() == (width, height)
     assert len(grid) == height
     assert all(len(row) == width for row in grid)
 
@@ -108,8 +109,9 @@ def test_no_avoidable_dead_ends(maze: Maze) -> None:
 
 def test_same_seed_gives_same_maze(config: Config) -> None:
     """The fixed seed of the first level always gives the same maze."""
-    first = Maze(config, config.seed).get_maze()
-    assert first == Maze(config, config.seed).get_maze()
+    shape = (config.levels[0].width, config.levels[0].height)
+    first = Maze(shape, config.seed).get_maze()
+    assert first == Maze(shape, config.seed).get_maze()
 
 
 def test_can_move_matches_bits(maze: Maze) -> None:

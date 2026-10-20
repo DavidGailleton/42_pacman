@@ -85,9 +85,6 @@ HUD_MARGIN: int = 20
 WIDTH_SIZE = 1920
 HEIGHT_SIZE = 1080
 
-# Number of levels: winning the last one wins the game.
-MAX_LEVEL: int = 10
-
 # Seconds the ghosts stay edible after a super-pacgum is eaten.
 FRIGHTEN_TIME: float = 7.0
 

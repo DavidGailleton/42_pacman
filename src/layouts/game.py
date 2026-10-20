@@ -16,7 +16,6 @@ from src.constants import (
     DOWN,
     EAT_FREEZE_TIME,
     LEFT,
-    MAX_LEVEL,
     PACMAN_FRAMES_PER_CELL,
     RIGHT,
     UP,
@@ -52,13 +51,17 @@ class Game(Layout):
     def _load_level(self) -> None:
         """Build a new maze and put everything at its start position.
 
-        Level 1 uses the config seed, the next levels a random one.
+        Level n uses the size of the n-th entry of ``levels`` and the
+        config seed plus n - 1, so every level can be replayed.
         Score and lives are not touched: they carry over.
         """
         config = self.config
-        seed = config.seed if self.level == 1 else 0
+        level = config.levels[self.level - 1]
         self.time_left: float = config.level_max_time
-        self.maze = Maze(config=config, seed=seed)
+        self.maze = Maze(
+            shape=(level.width, level.height),
+            seed=config.seed + self.level - 1,
+        )
         self.pacgum = Pacgum(maze=self.maze, config=config)
         self.maze_renderer = MazeRenderer(
             maze=self.maze, screen_size=self.screen_size
@@ -86,7 +89,7 @@ class Game(Layout):
 
     def _next_level(self) -> None:
         """Go to the next level, or win the game after the last one."""
-        if self.level >= MAX_LEVEL:
+        if self.level >= len(self.config.levels):
             self.won = True
             return
         self.level += 1
