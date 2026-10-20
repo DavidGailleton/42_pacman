@@ -25,11 +25,17 @@ ALL_WALLS: int = NORTH | EAST | SOUTH | WEST
 
 
 class Maze:
-    def __init__(self, config: Config) -> None:
+    def __init__(self, config: Config, seed: int) -> None:
+        """Generate a maze with the A-Maze-ing package.
+
+        Args:
+            config: Game configuration, gives the maze shape.
+            seed: Seed of the maze. 0 or less gives a random maze.
+        """
         self.config = config
         try:
             self.maze = MazeGenerator(
-                size=config.shape, seed=config.seed, perfect=False
+                size=config.shape, seed=seed, perfect=False
             )
         except Exception as error:
             raise RuntimeError(f"Maze Generation Failed: {error}") from error

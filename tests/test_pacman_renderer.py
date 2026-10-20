@@ -13,7 +13,7 @@ SCREEN_SIZE = (1920, 1080)
 
 def make_renderer() -> PacmanRenderer:
     """Build a renderer for the default 21x21 maze."""
-    return PacmanRenderer(Maze(Config()), SCREEN_SIZE)
+    return PacmanRenderer(Maze(Config(), Config().seed), SCREEN_SIZE)
 
 
 def test_to_pixel_cell_center() -> None:

@@ -21,7 +21,7 @@ def config() -> Config:
 @pytest.fixture
 def maze(config: Config) -> Maze:
     """Build a maze from the original configuration."""
-    return Maze(config)
+    return Maze(config, config.seed)
 
 
 def all_cells(maze: Maze) -> list[tuple[int, int]]:
@@ -108,7 +108,8 @@ def test_no_avoidable_dead_ends(maze: Maze) -> None:
 
 def test_same_seed_gives_same_maze(config: Config) -> None:
     """The fixed seed of the first level always gives the same maze."""
-    assert Maze(config).get_maze() == Maze(config).get_maze()
+    first = Maze(config, config.seed).get_maze()
+    assert first == Maze(config, config.seed).get_maze()
 
 
 def test_can_move_matches_bits(maze: Maze) -> None:
