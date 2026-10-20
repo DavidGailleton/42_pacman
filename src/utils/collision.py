@@ -3,8 +3,9 @@
 from src.constants import COLLISION_DISTANCE
 
 
-def is_colliding(first: tuple[float, float],
-                 second: tuple[float, float]) -> bool:
+def is_colliding(
+    first: tuple[float, float], second: tuple[float, float]
+) -> bool:
     """Tell if two characters are close enough to collide.
 
     Positions are in cells, as floats, like ``Ghost.float_position``.

@@ -9,8 +9,12 @@ import pygame
 from src.constants import MAZE_SCREEN_RATIO, Color
 
 
-def fill_rect(screen: pygame.Surface, coord: tuple[int, int],
-              w_h: tuple[int, int], color: Color) -> None:
+def fill_rect(
+    screen: pygame.Surface,
+    coord: tuple[int, int],
+    w_h: tuple[int, int],
+    color: Color,
+) -> None:
     """Fill a rectangle pixel by pixel.
 
     Args:
@@ -26,8 +30,12 @@ def fill_rect(screen: pygame.Surface, coord: tuple[int, int],
             screen.set_at((x, y), color)
 
 
-def fill_circle(screen: pygame.Surface, radius: int,
-                coord_center: tuple[int, int], color: Color) -> None:
+def fill_circle(
+    screen: pygame.Surface,
+    radius: int,
+    coord_center: tuple[int, int],
+    color: Color,
+) -> None:
     """Fill a disc pixel by pixel.
 
     Args:
@@ -43,9 +51,9 @@ def fill_circle(screen: pygame.Surface, radius: int,
                 screen.set_at((cx + dx, cy + dy), color)
 
 
-def compute_layout(maze_shape: tuple[int, int],
-                   screen_size: tuple[int, int]
-                   ) -> tuple[int, tuple[int, int]]:
+def compute_layout(
+    maze_shape: tuple[int, int], screen_size: tuple[int, int]
+) -> tuple[int, tuple[int, int]]:
     """Compute where the maze is drawn on the screen.
 
     Every renderer uses this so they all agree on where a cell is.
@@ -69,8 +77,9 @@ def compute_layout(maze_shape: tuple[int, int],
     return cell_size, (offset_x, offset_y)
 
 
-def to_pixel(position: tuple[float, float], cell_size: int,
-             offset: tuple[int, int]) -> tuple[int, int]:
+def to_pixel(
+    position: tuple[float, float], cell_size: int, offset: tuple[int, int]
+) -> tuple[int, int]:
     """Convert a float cell position to the pixel of its center.
 
     Every moving renderer uses this so a position lands on the same

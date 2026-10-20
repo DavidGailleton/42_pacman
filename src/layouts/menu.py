@@ -3,7 +3,7 @@ from src.constants import (
     MENU_FONT_SIZE,
     MENU_LINE_SPACING,
     PACMAN_COLOR,
-    WHITE_COLOR
+    WHITE_COLOR,
 )
 
 

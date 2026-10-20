@@ -1,25 +1,20 @@
 from src.layouts.layout import Layout
 from src.models.config import Config
-from src.score_management import (
-    add_score,
-    MAX_NAME_LENGTH,
-    ScoreException
-)
-from src.constants import (
-    BLACK_COLOR,
-    PACMAN_COLOR,
-    BLINKY_COLOR,
-    WHITE_COLOR
-)
+from src.score_management import add_score, MAX_NAME_LENGTH, ScoreException
+from src.constants import BLACK_COLOR, PACMAN_COLOR, BLINKY_COLOR, WHITE_COLOR
 import pygame
-
 
 CURSOR_BLINK_TIME = 0.5
 
 
 class EndScreen(Layout):
-    def __init__(self, config: Config, screen_size: tuple[int, int],
-                 score: int, win: bool) -> None:
+    def __init__(
+        self,
+        config: Config,
+        screen_size: tuple[int, int],
+        score: int,
+        win: bool,
+    ) -> None:
         self.config = config
         self.screen_size = screen_size
         self.score = score
@@ -39,6 +34,7 @@ class EndScreen(Layout):
             except ScoreException as e:
                 print(e)
             from src.layouts.main_menu import MainMenu
+
             return MainMenu(screen_size=self.screen_size, config=self.config)
         if event.key == pygame.K_BACKSPACE:
             self.name = self.name[-1:]
@@ -66,14 +62,30 @@ class EndScreen(Layout):
             color = BLINKY_COLOR
         cursor = "|" if self.cursor_visible else " "
         self._draw_text(screen, self.title_font, title, color, (center_x, 250))
-        self._draw_text(screen, self.font, f"SCORE: {self.score}",
-                        WHITE_COLOR, (center_x, 420))
-        self._draw_text(screen, self.font, "ENTER YOUR NAME:",
-                        WHITE_COLOR, (center_x, 550))
-        self._draw_text(screen, self.font, self.name + cursor,
-                        PACMAN_COLOR, (center_x, 640))
-        self._draw_text(screen, self.font, "PRESS ENTER TO SAVE",
-                        WHITE_COLOR, (center_x, 800))
+        self._draw_text(
+            screen,
+            self.font,
+            f"SCORE: {self.score}",
+            WHITE_COLOR,
+            (center_x, 420),
+        )
+        self._draw_text(
+            screen, self.font, "ENTER YOUR NAME:", WHITE_COLOR, (center_x, 550)
+        )
+        self._draw_text(
+            screen,
+            self.font,
+            self.name + cursor,
+            PACMAN_COLOR,
+            (center_x, 640),
+        )
+        self._draw_text(
+            screen,
+            self.font,
+            "PRESS ENTER TO SAVE",
+            WHITE_COLOR,
+            (center_x, 800),
+        )
 
     @staticmethod
     def _key_to_char(key: int) -> str | None:
@@ -85,8 +97,12 @@ class EndScreen(Layout):
         return None
 
     @staticmethod
-    def _draw_text(screen: pygame.Surface, font: pygame.font.Font, text: str,
-                   color: tuple[int, int, int],
-                   center: tuple[int, int]) -> None:
+    def _draw_text(
+        screen: pygame.Surface,
+        font: pygame.font.Font,
+        text: str,
+        color: tuple[int, int, int],
+        center: tuple[int, int],
+    ) -> None:
         image = font.render(text, True, color)
         screen.blit(image, image.get_rect(center=center))

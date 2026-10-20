@@ -38,14 +38,16 @@ KEY_TO_DIRECTION: dict[int, Direction] = {
 class Game(Layout):
     def __init__(self, config: Config, screen_size: tuple[int, int]) -> None:
         self.config = config
-        self.time_left = config.level_max_time
+        self.time_left: float = config.level_max_time
         self.score = 0
         self.lives = config.lives
         self.level = 1
         self.screen_size = screen_size
         self.maze = Maze(config=config)
         self.pacgum = Pacgum(maze=self.maze, config=config)
-        self.maze_renderer = MazeRenderer(maze=self.maze, screen_size=self.screen_size)
+        self.maze_renderer = MazeRenderer(
+            maze=self.maze, screen_size=self.screen_size
+        )
         self.pacgum_renderer = PacgumRenderer(
             pacgum=self.pacgum, screen_size=self.screen_size, maze=self.maze
         )
@@ -55,7 +57,9 @@ class Game(Layout):
         self.ghost_renderer = GhostRenderer(
             maze=self.maze, screen_size=self.screen_size
         )
-        self.hud_renderer = HudRenderer(maze=self.maze, screen_size=self.screen_size)
+        self.hud_renderer = HudRenderer(
+            maze=self.maze, screen_size=self.screen_size
+        )
         self.ghosts: list[Ghost] = self._make_ghosts(config=config)
         self.pacman_cell: tuple[int, int] = self._find_start_cell()
         self.pacman_step = 0
@@ -128,7 +132,7 @@ class Game(Layout):
             if self.freeze_timer <= 0 and self.eaten_ghost is not None:
                 self.score += self.eaten_ghost.eat()
                 self.eaten_ghost = None
-            return
+            return None
         self._handle_time_left(dt)
         self._update_pacman()
         for ghost in self.ghosts:
@@ -139,6 +143,7 @@ class Game(Layout):
         self.ghost_renderer.update(dt)
         self._handle_collisions()
         self._eat_pacgum()
+        return None
 
     def _handle_key(self, key: int) -> None:
         """Remember the move asked by a key press.
@@ -251,7 +256,9 @@ class Game(Layout):
         width, height = self.maze.get_shape()
         center_x, center_y = width // 2, height // 2
         cells = [(x, y) for y in range(height) for x in range(width)]
-        cells.sort(key=lambda cell: abs(cell[0] - center_x) + abs(cell[1] - center_y))
+        cells.sort(
+            key=lambda cell: abs(cell[0] - center_x) + abs(cell[1] - center_y)
+        )
         for cell in cells:
             if not self.maze.is_closed(cell):
                 return cell
@@ -267,7 +274,9 @@ class Game(Layout):
             and self._is_opposite(self.current_move, self.next_move)
             and self.pacman_step > 0
         ):
-            self.pacman_cell = self._neighbour(self.pacman_cell, self.current_move)
+            self.pacman_cell = self._neighbour(
+                self.pacman_cell, self.current_move
+            )
             self.pacman_step = PACMAN_FRAMES_PER_CELL - self.pacman_step
             self.current_move = self.next_move
             self.next_move = None
@@ -290,7 +299,9 @@ class Game(Layout):
         self.pacman_facing = self.current_move
         self.pacman_step += 1
         if self.pacman_step == PACMAN_FRAMES_PER_CELL:
-            self.pacman_cell = self._neighbour(self.pacman_cell, self.current_move)
+            self.pacman_cell = self._neighbour(
+                self.pacman_cell, self.current_move
+            )
             self.pacman_step = 0
 
     def _pacman_position(self) -> tuple[float, float]:
@@ -308,7 +319,9 @@ class Game(Layout):
         return x + dx * progress, y + dy * progress
 
     @staticmethod
-    def _neighbour(cell: tuple[int, int], direction: Direction) -> tuple[int, int]:
+    def _neighbour(
+        cell: tuple[int, int], direction: Direction
+    ) -> tuple[int, int]:
         """Return the cell next to ``cell`` in ``direction``.
 
         Args:

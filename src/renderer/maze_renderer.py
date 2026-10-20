@@ -26,8 +26,9 @@ class MazeRenderer:
             maze: New maze to draw.
         """
         self.maze = maze
-        self.cell_size, self.offset = compute_layout(maze.get_shape(),
-                                                     self.screen_size)
+        self.cell_size, self.offset = compute_layout(
+            maze.get_shape(), self.screen_size
+        )
         self.surface = self._build_surface()
 
     def draw(self, screen: pygame.Surface) -> None:
@@ -51,18 +52,22 @@ class MazeRenderer:
         segments = self._get_segments()
         for segment in segments:
             half = first_thickness // 2
-            self._draw_wall(screen, segment, first_thickness,
-                            half, MAZE_COLOR)
+            self._draw_wall(screen, segment, first_thickness, half, MAZE_COLOR)
         for segment in segments:
             half = second_thickness // 2
-            self._draw_wall(screen, segment, second_thickness,
-                            half, BLACK_COLOR)
+            self._draw_wall(
+                screen, segment, second_thickness, half, BLACK_COLOR
+            )
         return screen
 
-    def _draw_wall(self, screen: pygame.Surface,
-                   segment: tuple[tuple[int, int], tuple[int, int]],
-                   thickness: int, half: int, color: Color
-                   ) -> None:
+    def _draw_wall(
+        self,
+        screen: pygame.Surface,
+        segment: tuple[tuple[int, int], tuple[int, int]],
+        thickness: int,
+        half: int,
+        color: Color,
+    ) -> None:
         """Draw one wall segment with rounded ends.
 
         Args:

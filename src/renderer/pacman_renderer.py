@@ -40,8 +40,9 @@ class PacmanRenderer:
             maze: New maze Pac-Man moves in.
         """
         self.maze = maze
-        self.cell_size, self.offset = compute_layout(maze.get_shape(),
-                                                     self.screen_size)
+        self.cell_size, self.offset = compute_layout(
+            maze.get_shape(), self.screen_size
+        )
         self.radius = int(self.cell_size * PACMAN_RADIUS_RATIO)
 
     def update(self, dt: float) -> None:
@@ -52,8 +53,12 @@ class PacmanRenderer:
         """
         self._phase = (self._phase + dt * PACMAN_MOUTH_SPEED) % 1.0
 
-    def draw(self, screen: pygame.Surface, position: tuple[float, float],
-             direction: Direction) -> None:
+    def draw(
+        self,
+        screen: pygame.Surface,
+        position: tuple[float, float],
+        direction: Direction,
+    ) -> None:
         """Draw Pac-Man on the screen.
 
         Args:
@@ -66,8 +71,13 @@ class PacmanRenderer:
         center = to_pixel(position, self.cell_size, self.offset)
         self._fill_pacman(screen, center, direction, mouth_angle)
 
-    def _fill_pacman(self, screen: pygame.Surface, center: tuple[int, int],
-                     direction: Direction, mouth_angle: float) -> None:
+    def _fill_pacman(
+        self,
+        screen: pygame.Surface,
+        center: tuple[int, int],
+        direction: Direction,
+        mouth_angle: float,
+    ) -> None:
         """Fill a disc pixel by pixel, leaving out the mouth wedge.
 
         Args:

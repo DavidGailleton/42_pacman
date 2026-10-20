@@ -1,9 +1,6 @@
 from src.models.config import Config
 from src.layouts.layout import Layout
-from src.constants import (
-    WIDTH_SIZE,
-    HEIGHT_SIZE, FPS
-)
+from src.constants import WIDTH_SIZE, HEIGHT_SIZE, FPS
 from src.layouts.main_menu import MainMenu
 import pygame
 
@@ -15,8 +12,7 @@ class App:
         self.clock = pygame.time.Clock()
         self.config = config
         self.layout: Layout | None = MainMenu(
-            config=config,
-            screen_size=self.screen.get_size()
+            config=config, screen_size=self.screen.get_size()
         )
 
     def run(self) -> None:

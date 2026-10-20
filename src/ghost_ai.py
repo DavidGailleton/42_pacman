@@ -183,8 +183,9 @@ class Ghost(ABC):
         progress = self.step / GHOST_FRAMES_PER_CELL
         return x + dx * progress, y + dy * progress
 
-    def _choose_direction(self, pacman: Cell,
-                          pacman_direction: Direction) -> Direction | None:
+    def _choose_direction(
+        self, pacman: Cell, pacman_direction: Direction
+    ) -> Direction | None:
         """Choose where to go from the current cell center.
 
         In order: the forced turn of a frightened ghost in its corner,
@@ -277,9 +278,11 @@ class Ghost(ABC):
             The forced direction, or None if the rule does not apply
             or a wall blocks that direction.
         """
-        if (self.state is not GhostState.FRIGHTENED
-                or self.position != self.corner
-                or self.direction is None):
+        if (
+            self.state is not GhostState.FRIGHTENED
+            or self.position != self.corner
+            or self.direction is None
+        ):
             return None
         # Sign of the way toward the inside of the maze, on each axis.
         inward_x = 1 if self.corner[0] == 0 else -1
@@ -395,8 +398,9 @@ class Inky(Ghost):
 
     color = INKY_COLOR
 
-    def __init__(self, corner: Cell, maze: Maze, blinky: Blinky,
-                 config: Config) -> None:
+    def __init__(
+        self, corner: Cell, maze: Maze, blinky: Blinky, config: Config
+    ) -> None:
         """Place Inky in its corner and remember Blinky.
 
         Args:

@@ -29,9 +29,7 @@ class Maze:
         self.config = config
         try:
             self.maze = MazeGenerator(
-                size=config.shape,
-                seed=config.seed,
-                perfect=False
+                size=config.shape, seed=config.seed, perfect=False
             )
         except Exception as error:
             raise RuntimeError(f"Maze Generation Failed: {error}") from error

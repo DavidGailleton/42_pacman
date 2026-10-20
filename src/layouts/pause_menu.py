@@ -21,8 +21,7 @@ class PauseMenu(Layout):
             return None
         if choice == "Resume" or event.key == pygame.K_ESCAPE:
             return self.game
-        elif choice == "Main menu":
-            return None
+        return None
 
     def draw(self, screen: pygame.Surface) -> None:
         self.game.draw(screen=screen)
