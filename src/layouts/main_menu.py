@@ -2,6 +2,7 @@ from src.layouts.layout import Layout
 from src.layouts.menu import Menu
 from src.layouts.game import Game
 from src.models.config import Config
+from src.score_management import get_scores
 import pygame
 
 
@@ -17,6 +18,17 @@ class MainMenu(Layout):
         choice = self.menu.handle_event(event)
         if choice == "Start Game":
             return Game(config=self.config, screen_size=self.screen_size)
+        elif choice == "View HighScores":
+            from src.layouts.view_score import ViewScores
+            return ViewScores(
+                screen_size=self.screen_size,
+                config=self.config,
+                scores=get_scores(config=self.config)
+            )
+        elif choice == "Instructions":
+            pass
+        elif choice == "Exit":
+            pygame.event.post(pygame.event.Event(pygame.QUIT))
         return None
 
     def draw(self, screen: pygame.Surface) -> None:
