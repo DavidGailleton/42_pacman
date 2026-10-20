@@ -10,21 +10,13 @@ class MainMenu(Layout):
         self.screen_size = screen_size
         self.config = config
         self.menu = Menu(
-            options=[
-                "Start Game",
-                "View HighScores",
-                "Instructions",
-                "Exit"
-            ]
+            options=["Start Game", "View HighScores", "Instructions", "Exit"]
         )
 
     def handle_event(self, event: pygame.event.Event) -> Layout | None:
         choice = self.menu.handle_event(event)
         if choice == "Start Game":
-            return Game(
-                config=self.config,
-                screen_size=self.screen_size
-            )
+            return Game(config=self.config, screen_size=self.screen_size)
         return None
 
     def draw(self, screen: pygame.Surface) -> None:

@@ -51,8 +51,9 @@ class GhostRenderer:
             maze: New maze the ghosts move in.
         """
         self.maze = maze
-        self.cell_size, self.offset = compute_layout(maze.get_shape(),
-                                                     self.screen_size)
+        self.cell_size, self.offset = compute_layout(
+            maze.get_shape(), self.screen_size
+        )
         self.radius = int(self.cell_size * GHOST_RADIUS_RATIO)
 
     def update(self, dt: float) -> None:
@@ -63,8 +64,13 @@ class GhostRenderer:
         """
         self._phase = (self._phase + dt * GHOST_SKIRT_SPEED) % 1.0
 
-    def draw(self, screen: pygame.Surface, position: tuple[float, float],
-             color: Color, state: GhostState) -> None:
+    def draw(
+        self,
+        screen: pygame.Surface,
+        position: tuple[float, float],
+        color: Color,
+        state: GhostState,
+    ) -> None:
         """Draw one ghost on the screen.
 
         Args:
@@ -112,8 +118,13 @@ class GhostRenderer:
         notch = abs(2 * u / period - 1)
         return depth >= skirt_height * notch
 
-    def _fill_body(self, screen: pygame.Surface, center: tuple[int, int],
-                   color: Color, alpha: float) -> None:
+    def _fill_body(
+        self,
+        screen: pygame.Surface,
+        center: tuple[int, int],
+        color: Color,
+        alpha: float,
+    ) -> None:
         """Fill the ghost's body pixel by pixel.
 
         With ``alpha`` below 1, each pixel is mixed with the pixel
@@ -142,8 +153,9 @@ class GhostRenderer:
                     under = screen.get_at(pixel)
                     screen.set_at(pixel, _blend(under, color, alpha))
 
-    def _draw_eyes(self, screen: pygame.Surface,
-                   center: tuple[int, int]) -> None:
+    def _draw_eyes(
+        self, screen: pygame.Surface, center: tuple[int, int]
+    ) -> None:
         """Draw the two eyes of a normal or eaten ghost.
 
         Args:
@@ -158,8 +170,9 @@ class GhostRenderer:
             fill_circle(screen, r * 3 // 10, (eye_x, eye_y), GHOST_EYE_COLOR)
             fill_circle(screen, r // 7, (eye_x, eye_y), GHOST_PUPIL_COLOR)
 
-    def _draw_frightened_face(self, screen: pygame.Surface,
-                              center: tuple[int, int]) -> None:
+    def _draw_frightened_face(
+        self, screen: pygame.Surface, center: tuple[int, int]
+    ) -> None:
         """Draw the small eyes and zigzag mouth of a frightened ghost.
 
         Args:
@@ -170,9 +183,12 @@ class GhostRenderer:
         r = self.radius
         eye_y = cy - r // 5
         for side in (-1, 1):
-            fill_circle(screen, max(1, r // 7),
-                        (cx + side * (r * 2 // 5), eye_y),
-                        FRIGHTENED_FACE_COLOR)
+            fill_circle(
+                screen,
+                max(1, r // 7),
+                (cx + side * (r * 2 // 5), eye_y),
+                FRIGHTENED_FACE_COLOR,
+            )
         # Zigzag: small squares, alternately high and low.
         step = max(1, r // 5)
         mouth_y = cy + r * 2 // 5

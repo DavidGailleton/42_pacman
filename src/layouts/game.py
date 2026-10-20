@@ -38,7 +38,7 @@ KEY_TO_DIRECTION: dict[int, Direction] = {
 class Game(Layout):
     def __init__(self, config: Config, screen_size: tuple[int, int]) -> None:
         self.config = config
-        self.time_left = config.level_max_time
+        self.time_left: float = config.level_max_time
         self.score = 0
         self.lives = config.lives
         self.level = 1
@@ -46,25 +46,19 @@ class Game(Layout):
         self.maze = Maze(config=config)
         self.pacgum = Pacgum(maze=self.maze, config=config)
         self.maze_renderer = MazeRenderer(
-            maze=self.maze,
-            screen_size=self.screen_size
+            maze=self.maze, screen_size=self.screen_size
         )
         self.pacgum_renderer = PacgumRenderer(
-            pacgum=self.pacgum,
-            screen_size=self.screen_size,
-            maze=self.maze
+            pacgum=self.pacgum, screen_size=self.screen_size, maze=self.maze
         )
         self.pacman_renderer = PacmanRenderer(
-            maze=self.maze,
-            screen_size=self.screen_size
+            maze=self.maze, screen_size=self.screen_size
         )
         self.ghost_renderer = GhostRenderer(
-            maze=self.maze,
-            screen_size=self.screen_size
+            maze=self.maze, screen_size=self.screen_size
         )
         self.hud_renderer = HudRenderer(
-            maze=self.maze,
-            screen_size=self.screen_size
+            maze=self.maze, screen_size=self.screen_size
         )
         self.ghosts: list[Ghost] = self._make_ghosts(config=config)
         self.pacman_cell: tuple[int, int] = self._find_start_cell()
@@ -75,11 +69,15 @@ class Game(Layout):
         self.game_over: bool = False
         self.freeze_timer: float = 0.0
         self.eaten_ghost: Ghost | None = None
+        self.cheat_mode: bool = False
 
     def handle_event(self, event: pygame.event.Event) -> Layout | None:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                return (PauseMenu(game=self))
+                return PauseMenu(game=self)
+            if event.key == pygame.K_c:
+                self.cheat_mode = not self.cheat_mode
+                return self
             self._handle_key(event.key)
         return self
 
@@ -95,22 +93,22 @@ class Game(Layout):
         self.pacman_renderer.draw(
             screen=screen,
             position=self._pacman_position(),
-            direction=self.pacman_facing
+            direction=self.pacman_facing,
         )
         for ghost in self.ghosts:
             self.ghost_renderer.draw(
                 screen=screen,
                 position=ghost.float_position(),
                 color=ghost.color,
-                state=ghost.state
-
+                state=ghost.state,
             )
         self.hud_renderer.draw(
             screen=screen,
             lives=self.lives,
             score=self.score,
             time_left=self.time_left,
-            lvl=self.level
+            lvl=self.level,
+            cheat_mode=self.cheat_mode,
         )
 
     def _update(self, dt: float) -> Layout | None:
@@ -127,14 +125,14 @@ class Game(Layout):
                 config=self.config,
                 screen_size=self.screen_size,
                 score=self.score,
-                win=False
+                win=False,
             )
         if self.freeze_timer > 0:
             self.freeze_timer -= dt
             if self.freeze_timer <= 0 and self.eaten_ghost is not None:
                 self.score += self.eaten_ghost.eat()
                 self.eaten_ghost = None
-            return
+            return None
         self._handle_time_left(dt)
         self._update_pacman()
         for ghost in self.ghosts:
@@ -145,6 +143,7 @@ class Game(Layout):
         self.ghost_renderer.update(dt)
         self._handle_collisions()
         self._eat_pacgum()
+        return None
 
     def _handle_key(self, key: int) -> None:
         """Remember the move asked by a key press.
@@ -187,7 +186,10 @@ class Game(Layout):
         ghosts = self._colliding_ghosts()
         # Chasers first: touching one loses, even if a frightened
         # ghost is touched on the same frame.
-        if any(ghost.state is GhostState.CHASE for ghost in ghosts):
+        if any(
+            ghost.state is GhostState.CHASE and not self.cheat_mode
+            for ghost in ghosts
+        ):
             self._lose_life()
             return
         for ghost in ghosts:

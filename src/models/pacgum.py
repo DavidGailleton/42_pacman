@@ -11,12 +11,7 @@ class Pacgum:
 
     def _place_corner(self, maze: Maze) -> set[tuple[int, int]]:
         w, h = maze.get_shape()
-        return {
-            (0, 0),
-            (w - 1, 0),
-            (0, h - 1),
-            (w - 1, h - 1)
-        }
+        return {(0, 0), (w - 1, 0), (0, h - 1), (w - 1, h - 1)}
 
     def _place_pacgum(self, maze: Maze) -> set[tuple[int, int]]:
         cols, rows = maze.get_shape()
@@ -24,8 +19,10 @@ class Pacgum:
 
         for x in range(cols):
             for y in range(rows):
-                if (not maze.is_closed((x, y)) and
-                   (x, y) not in self.super_pacgum):
+                if (
+                    not maze.is_closed((x, y))
+                    and (x, y) not in self.super_pacgum
+                ):
                     pacgum.add((x, y))
         return pacgum
 

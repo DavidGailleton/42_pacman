@@ -25,6 +25,8 @@ BLACK_COLOR: Color = (0, 0, 0)
 MAZE_COLOR: Color = (33, 33, 222)
 PACMAN_COLOR: Color = (255, 255, 0)
 WHITE_COLOR: Color = (255, 255, 255)
+# HUD label shown in cheat mode.
+CHEAT_COLOR: Color = (255, 0, 0)
 
 # Body color of each ghost, in chase mode.
 BLINKY_COLOR: Color = (255, 0, 0)

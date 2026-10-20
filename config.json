@@ -2,8 +2,8 @@
 {
   "highscore_filename": "highscores.json",
   "shape": [
-    21,
-    21
+    15,
+    15
   ],
   # Number of lives at the start of the game
   "lives": 3,

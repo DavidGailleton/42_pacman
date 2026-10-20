@@ -74,9 +74,7 @@ def test_neighbour_walls_are_consistent(maze: Maze) -> None:
         if x + 1 < width:
             assert maze.is_east_wall((x, y)) == maze.is_west_wall((x + 1, y))
         if y + 1 < height:
-            assert maze.is_south_wall((x, y)) == maze.is_north_wall(
-                (x, y + 1)
-            )
+            assert maze.is_south_wall((x, y)) == maze.is_north_wall((x, y + 1))
 
 
 def test_no_avoidable_dead_ends(maze: Maze) -> None:
@@ -103,9 +101,9 @@ def test_no_avoidable_dead_ends(maze: Maze) -> None:
         for dx, dy in closed:
             nx, ny = x + dx, y + dy
             on_border = not (0 <= nx < width and 0 <= ny < height)
-            assert on_border or grid[ny][nx] == 15, (
-                f"avoidable dead end at {(x, y)}"
-            )
+            assert (
+                on_border or grid[ny][nx] == 15
+            ), f"avoidable dead end at {(x, y)}"
 
 
 def test_same_seed_gives_same_maze(config: Config) -> None:

@@ -2,14 +2,14 @@ import pygame
 from src.models.pacgum import Pacgum
 from src.utils.maze import Maze
 
-
 MAZE_SCREEN_RATIO = 0.8
 WHITE_COLOR = (255, 255, 255)
 
 
 class PacgumRenderer:
-    def __init__(self, pacgum: Pacgum, screen_size: tuple[int, int],
-                 maze: Maze) -> None:
+    def __init__(
+        self, pacgum: Pacgum, screen_size: tuple[int, int], maze: Maze
+    ) -> None:
         self.screen_size = screen_size
         self.shape = maze.get_shape()
         self.set_pacgum(pacgum)
@@ -34,8 +34,9 @@ class PacgumRenderer:
         for cell in self.pacgum.get_pacgum():
             screen.blit(self.dot, self._dot_position(cell, self.radius))
         for cell in self.pacgum.get_super_pacgum():
-            screen.blit(self.super_dot,
-                        self._dot_position(cell, self.super_radius))
+            screen.blit(
+                self.super_dot, self._dot_position(cell, self.super_radius)
+            )
 
     def _make_dot(self, radius: int) -> pygame.Surface:
         size = 2 * radius + 1
@@ -43,17 +44,22 @@ class PacgumRenderer:
         self._fill_circle(dot, radius, (radius, radius), WHITE_COLOR)
         return dot
 
-    def _dot_position(self, cell: tuple[int, int],
-                      radius: int) -> tuple[int, int]:
+    def _dot_position(
+        self, cell: tuple[int, int], radius: int
+    ) -> tuple[int, int]:
         add_y, add_x = self.offset
         px, py = cell
         cx = px * self.cell_size + self.half + add_x
         cy = py * self.cell_size + self.half + add_y
         return (cx - radius, cy - radius)
 
-    def _fill_circle(self, screen: pygame.Surface, radius: int,
-                     coord_center: tuple[int, int],
-                     color: tuple[int, int, int]) -> None:
+    def _fill_circle(
+        self,
+        screen: pygame.Surface,
+        radius: int,
+        coord_center: tuple[int, int],
+        color: tuple[int, int, int],
+    ) -> None:
         cx, cy = coord_center
         for dy in range(-radius, radius + 1):
             for dx in range(-radius, radius + 1):
