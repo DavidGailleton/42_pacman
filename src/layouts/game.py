@@ -45,27 +45,17 @@ class Game(Layout):
         self.screen_size = screen_size
         self.maze = Maze(config=config)
         self.pacgum = Pacgum(maze=self.maze, config=config)
-        self.maze_renderer = MazeRenderer(
-            maze=self.maze,
-            screen_size=self.screen_size
-        )
+        self.maze_renderer = MazeRenderer(maze=self.maze, screen_size=self.screen_size)
         self.pacgum_renderer = PacgumRenderer(
-            pacgum=self.pacgum,
-            screen_size=self.screen_size,
-            maze=self.maze
+            pacgum=self.pacgum, screen_size=self.screen_size, maze=self.maze
         )
         self.pacman_renderer = PacmanRenderer(
-            maze=self.maze,
-            screen_size=self.screen_size
+            maze=self.maze, screen_size=self.screen_size
         )
         self.ghost_renderer = GhostRenderer(
-            maze=self.maze,
-            screen_size=self.screen_size
+            maze=self.maze, screen_size=self.screen_size
         )
-        self.hud_renderer = HudRenderer(
-            maze=self.maze,
-            screen_size=self.screen_size
-        )
+        self.hud_renderer = HudRenderer(maze=self.maze, screen_size=self.screen_size)
         self.ghosts: list[Ghost] = self._make_ghosts(config=config)
         self.pacman_cell: tuple[int, int] = self._find_start_cell()
         self.pacman_step = 0
@@ -75,11 +65,12 @@ class Game(Layout):
         self.game_over: bool = False
         self.freeze_timer: float = 0.0
         self.eaten_ghost: Ghost | None = None
+        self.cheat_mode: bool = False
 
     def handle_event(self, event: pygame.event.Event) -> Layout | None:
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
-                return (PauseMenu(game=self))
+                return PauseMenu(game=self)
             self._handle_key(event.key)
         return self
 
@@ -95,22 +86,21 @@ class Game(Layout):
         self.pacman_renderer.draw(
             screen=screen,
             position=self._pacman_position(),
-            direction=self.pacman_facing
+            direction=self.pacman_facing,
         )
         for ghost in self.ghosts:
             self.ghost_renderer.draw(
                 screen=screen,
                 position=ghost.float_position(),
                 color=ghost.color,
-                state=ghost.state
-
+                state=ghost.state,
             )
         self.hud_renderer.draw(
             screen=screen,
             lives=self.lives,
             score=self.score,
             time_left=self.time_left,
-            lvl=self.level
+            lvl=self.level,
         )
 
     def _update(self, dt: float) -> Layout | None:
@@ -127,7 +117,7 @@ class Game(Layout):
                 config=self.config,
                 screen_size=self.screen_size,
                 score=self.score,
-                win=False
+                win=False,
             )
         if self.freeze_timer > 0:
             self.freeze_timer -= dt
@@ -187,7 +177,10 @@ class Game(Layout):
         ghosts = self._colliding_ghosts()
         # Chasers first: touching one loses, even if a frightened
         # ghost is touched on the same frame.
-        if any(ghost.state is GhostState.CHASE for ghost in ghosts):
+        if any(
+            ghost.state is GhostState.CHASE and self.cheat_mode == False
+            for ghost in ghosts
+        ):
             self._lose_life()
             return
         for ghost in ghosts:
@@ -254,9 +247,7 @@ class Game(Layout):
         width, height = self.maze.get_shape()
         center_x, center_y = width // 2, height // 2
         cells = [(x, y) for y in range(height) for x in range(width)]
-        cells.sort(
-            key=lambda cell: abs(cell[0] - center_x) + abs(cell[1] - center_y)
-        )
+        cells.sort(key=lambda cell: abs(cell[0] - center_x) + abs(cell[1] - center_y))
         for cell in cells:
             if not self.maze.is_closed(cell):
                 return cell
@@ -272,9 +263,7 @@ class Game(Layout):
             and self._is_opposite(self.current_move, self.next_move)
             and self.pacman_step > 0
         ):
-            self.pacman_cell = self._neighbour(
-                self.pacman_cell, self.current_move
-            )
+            self.pacman_cell = self._neighbour(self.pacman_cell, self.current_move)
             self.pacman_step = PACMAN_FRAMES_PER_CELL - self.pacman_step
             self.current_move = self.next_move
             self.next_move = None
@@ -297,9 +286,7 @@ class Game(Layout):
         self.pacman_facing = self.current_move
         self.pacman_step += 1
         if self.pacman_step == PACMAN_FRAMES_PER_CELL:
-            self.pacman_cell = self._neighbour(
-                self.pacman_cell, self.current_move
-            )
+            self.pacman_cell = self._neighbour(self.pacman_cell, self.current_move)
             self.pacman_step = 0
 
     def _pacman_position(self) -> tuple[float, float]:
@@ -317,9 +304,7 @@ class Game(Layout):
         return x + dx * progress, y + dy * progress
 
     @staticmethod
-    def _neighbour(
-        cell: tuple[int, int], direction: Direction
-    ) -> tuple[int, int]:
+    def _neighbour(cell: tuple[int, int], direction: Direction) -> tuple[int, int]:
         """Return the cell next to ``cell`` in ``direction``.
 
         Args:
