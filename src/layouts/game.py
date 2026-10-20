@@ -104,6 +104,7 @@ class Game(Layout):
             score=self.score,
             time_left=self.time_left,
             lvl=self.level,
+            cheat_mode=self.cheat_mode,
         )
 
     def _update(self, dt: float) -> Layout | None:
