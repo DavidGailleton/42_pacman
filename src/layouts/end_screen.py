@@ -1,6 +1,7 @@
 from src.layouts.layout import Layout
 from src.models.config import Config
 from src.score_management import add_score, MAX_NAME_LENGTH, ScoreException
+from src.renderer.draw_utils import draw_text
 from src.constants import BLACK_COLOR, PACMAN_COLOR, BLINKY_COLOR, WHITE_COLOR
 import pygame
 
@@ -61,25 +62,25 @@ class EndScreen(Layout):
             title = "GAME OVER"
             color = BLINKY_COLOR
         cursor = "|" if self.cursor_visible else " "
-        self._draw_text(screen, self.title_font, title, color, (center_x, 250))
-        self._draw_text(
+        draw_text(screen, self.title_font, title, color, (center_x, 250))
+        draw_text(
             screen,
             self.font,
             f"SCORE: {self.score}",
             WHITE_COLOR,
             (center_x, 420),
         )
-        self._draw_text(
+        draw_text(
             screen, self.font, "ENTER YOUR NAME:", WHITE_COLOR, (center_x, 550)
         )
-        self._draw_text(
+        draw_text(
             screen,
             self.font,
             self.name + cursor,
             PACMAN_COLOR,
             (center_x, 640),
         )
-        self._draw_text(
+        draw_text(
             screen,
             self.font,
             "PRESS ENTER TO SAVE",
@@ -95,14 +96,3 @@ class EndScreen(Layout):
         if key == pygame.K_SPACE:
             return " "
         return None
-
-    @staticmethod
-    def _draw_text(
-        screen: pygame.Surface,
-        font: pygame.font.Font,
-        text: str,
-        color: tuple[int, int, int],
-        center: tuple[int, int],
-    ) -> None:
-        image = font.render(text, True, color)
-        screen.blit(image, image.get_rect(center=center))
