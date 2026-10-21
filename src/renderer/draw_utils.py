@@ -101,3 +101,23 @@ def to_pixel(
     pixel_x = offset_x + half_cell + int(x * cell_size)
     pixel_y = offset_y + half_cell + int(y * cell_size)
     return pixel_x, pixel_y
+
+
+def draw_text(
+    screen: pygame.Surface,
+    font: pygame.font.Font,
+    text: str,
+    color: Color,
+    center: tuple[int, int],
+) -> None:
+    """Draw a line of text centered on a point.
+
+    Args:
+        screen: Surface to draw on.
+        font: Font used to render the text.
+        text: Text to draw.
+        color: Text color.
+        center: Pixel (x, y) the text is centered on.
+    """
+    image = font.render(text, True, color)
+    screen.blit(image, image.get_rect(center=center))
