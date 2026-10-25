@@ -12,3 +12,21 @@
 
 ```bash
 make install
+
+## Packaging
+
+The game is packaged as a standalone Linux executable with
+[PyInstaller](https://pyinstaller.org). The build spec is `pac-man.spec`.
+
+```bash
+make package
+```
+
+This creates `release/pac-man-linux.tar.gz`, which contains:
+
+- `pac-man`: the executable (Python is not needed to run it)
+- `config.json`: the configuration file, which you can edit
+- `run.sh`: a launcher that runs `./pac-man config.json`
+- `INSTRUCTIONS.txt`: how to play
+
+Only a Linux build is provided, because PyInstaller can't cross-compile.

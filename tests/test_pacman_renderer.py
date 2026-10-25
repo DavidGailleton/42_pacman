@@ -58,5 +58,5 @@ def test_sprites_are_cached() -> None:
     renderer.draw(screen, (5.0, 5.0), RIGHT)
     renderer.draw(screen, (6.0, 5.0), RIGHT)
     assert len(renderer._sprites) == 1
-    renderer.set_maze(Maze(Config()))
+    renderer.set_maze(Maze((21, 21), Config().seed))
     assert renderer._sprites == {}

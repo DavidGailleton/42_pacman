@@ -13,8 +13,8 @@ SCREEN_SIZE = (1920, 1080)
 
 
 def make_renderer() -> GhostRenderer:
-    """Build a renderer for the default maze."""
-    return GhostRenderer(Maze(Config()), SCREEN_SIZE)
+    """Build a renderer for the default 21x21 maze."""
+    return GhostRenderer(Maze((21, 21), Config().seed), SCREEN_SIZE)
 
 
 def body_pixel(renderer: GhostRenderer, state: GhostState) -> tuple[int, ...]:
@@ -48,7 +48,7 @@ def test_sprites_are_cached() -> None:
     renderer.draw(screen, (1.0, 1.0), BLINKY_COLOR, GhostState.CHASE)
     renderer.draw(screen, (2.0, 1.0), BLINKY_COLOR, GhostState.CHASE)
     assert len(renderer._sprites) == 1
-    renderer.set_maze(Maze(Config()))
+    renderer.set_maze(Maze((21, 21), Config().seed))
     assert renderer._sprites == {}
 
 
