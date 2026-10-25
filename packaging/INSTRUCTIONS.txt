@@ -1,0 +1,26 @@
+PAC-MAN - Ghosts! More ghosts!
+==============================
+
+LAUNCH
+  ./run.sh                     (uses the config.json in this folder)
+  ./pac-man <config.json>      (use any other config file)
+
+CONTROLS
+  Arrow keys or WASD   Move Pac-Man / navigate menus
+  Enter                Select a menu entry
+  Esc                  Pause / resume (or go back from a screen)
+  C                    Toggle cheat mode (invincible)
+
+RULES
+  Eat every pacgum, or survive until the timer ends, to clear a level.
+  Super-pacgums (in the corners) make the ghosts edible for a while.
+  Score and lives carry over between levels.
+
+CONFIGURATION
+  Edit config.json (lines starting with # are comments).
+  Invalid values are replaced by safe defaults and reported in the terminal.
+  See the project README for the full list of keys.
+
+HIGHSCORES
+  Stored in the file named by "highscore_filename" (default: highscores.json),
+  relative to the folder the game is launched from. Top 10 scores are kept.
