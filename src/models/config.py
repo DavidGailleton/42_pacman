@@ -19,6 +19,23 @@ from pydantic import (
 MazeSide = Annotated[StrictInt, Field(ge=10, le=100)]
 
 
+class LevelConfig(BaseModel):
+    """Maze size of one level, in cells.
+
+    Unknown keys inside a level entry are ignored.
+    """
+
+    width: MazeSide
+    height: MazeSide
+
+
+# Used when 'levels' is missing or invalid: 10 levels, as the subject
+# asks for at least 10.
+DEFAULT_LEVELS: list[LevelConfig] = [
+    LevelConfig(width=21, height=21) for _ in range(10)
+]
+
+
 class Config(BaseModel):
     """Validated game configuration.
 
@@ -34,7 +51,8 @@ class Config(BaseModel):
     highscore_filename: StrictStr = Field(
         default="highscores.json", min_length=1
     )
-    shape: tuple[MazeSide, MazeSide] = (21, 21)
+    # One entry per level, played in order. Never empty.
+    levels: list[LevelConfig] = Field(default=DEFAULT_LEVELS, min_length=1)
     lives: StrictInt = Field(default=3, ge=1, le=99)
     point_per_pacgum: StrictInt = Field(default=10, ge=0)
     point_per_super_pacgum: StrictInt = Field(default=50, ge=0)

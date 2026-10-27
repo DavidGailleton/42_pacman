@@ -13,7 +13,7 @@ SCREEN_SIZE = (1920, 1080)
 
 def make_renderer() -> PacmanRenderer:
     """Build a renderer for the default 21x21 maze."""
-    return PacmanRenderer(Maze(Config()), SCREEN_SIZE)
+    return PacmanRenderer(Maze((21, 21), Config().seed), SCREEN_SIZE)
 
 
 def test_to_pixel_cell_center() -> None:
@@ -49,3 +49,14 @@ def test_draw_mouth_faces_direction() -> None:
     assert tuple(screen.get_at((cx - half, cy)))[:3] == PACMAN_COLOR
     assert tuple(screen.get_at((cx + half, cy)))[:3] == BLACK_COLOR
     assert tuple(screen.get_at((cx, cy - half)))[:3] == PACMAN_COLOR
+
+
+def test_sprites_are_cached() -> None:
+    """Each look is drawn once, then reused; a new maze clears them."""
+    renderer = make_renderer()
+    screen = pygame.Surface(SCREEN_SIZE)
+    renderer.draw(screen, (5.0, 5.0), RIGHT)
+    renderer.draw(screen, (6.0, 5.0), RIGHT)
+    assert len(renderer._sprites) == 1
+    renderer.set_maze(Maze((21, 21), Config().seed))
+    assert renderer._sprites == {}

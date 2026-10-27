@@ -10,7 +10,6 @@ from src.constants import (
     WEST,
     Direction,
 )
-from src.models.config import Config
 
 # Wall that blocks each move.
 DIRECTION_TO_WALL: dict[Direction, int] = {
@@ -25,17 +24,21 @@ ALL_WALLS: int = NORTH | EAST | SOUTH | WEST
 
 
 class Maze:
-    def __init__(self, config: Config) -> None:
-        self.config = config
+    def __init__(self, shape: tuple[int, int], seed: int) -> None:
+        """Generate a maze with the A-Maze-ing package.
+
+        Args:
+            shape: Maze size in cells, as (width, height).
+            seed: Seed of the maze. 0 or less gives a random maze.
+        """
+        self.shape = shape
         try:
-            self.maze = MazeGenerator(
-                size=config.shape, seed=config.seed, perfect=False
-            )
+            self.maze = MazeGenerator(size=shape, seed=seed, perfect=False)
         except Exception as error:
             raise RuntimeError(f"Maze Generation Failed: {error}") from error
 
     def get_shape(self) -> tuple[int, int]:
-        return self.config.shape
+        return self.shape
 
     def get_maze(self) -> list[list[int]]:
         grid: list[list[int]] = self.maze.maze

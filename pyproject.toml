@@ -11,7 +11,12 @@ dependencies = [
 ]
 
 [dependency-groups]
-dev = ["flake8>=7.0.0", "mypy>=1.10.0", "pytest>=8.0.0"]
+dev = [
+    "flake8>=7.0.0",
+    "mypy>=1.10.0",
+    "pyinstaller>=6.22.3",
+    "pytest>=8.0.0",
+]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]

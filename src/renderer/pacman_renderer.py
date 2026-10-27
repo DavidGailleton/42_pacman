@@ -14,12 +14,19 @@ from src.constants import (
 from src.renderer.draw_utils import compute_layout, to_pixel
 from src.utils.maze import Maze
 
+# Number of mouth openings drawn, from closed to fully open.
+MOUTH_FRAMES: int = 8
+
 
 class PacmanRenderer:
     """Draw Pac-Man, with an animated mouth facing its direction.
 
     Positions are in cells, as floats: ``(3.0, 2.0)`` is the center of
     cell (3, 2) and ``(3.5, 2.0)`` is halfway to cell (4, 2).
+
+    Drawing pixel by pixel is slow, so each look (direction, mouth
+    opening) is drawn once on a small surface, kept in ``_sprites``,
+    and only blitted on the following frames.
     """
 
     def __init__(self, maze: Maze, screen_size: tuple[int, int]) -> None:
@@ -44,6 +51,8 @@ class PacmanRenderer:
             maze.get_shape(), self.screen_size
         )
         self.radius = int(self.cell_size * PACMAN_RADIUS_RATIO)
+        # The cell size changed: the old sprites have the wrong size.
+        self._sprites: dict[tuple[Direction, int], pygame.Surface] = {}
 
     def update(self, dt: float) -> None:
         """Advance the mouth animation.
@@ -67,9 +76,33 @@ class PacmanRenderer:
             direction: Direction Pac-Man faces, as (dx, dy).
         """
         # Triangle wave: fully open at phase 0, closed at 0.5.
-        mouth_angle = PACMAN_MOUTH_MAX_ANGLE * abs(2 * self._phase - 1)
-        center = to_pixel(position, self.cell_size, self.offset)
-        self._fill_pacman(screen, center, direction, mouth_angle)
+        opening = abs(2 * self._phase - 1)
+        frame = round(opening * (MOUTH_FRAMES - 1))
+        cx, cy = to_pixel(position, self.cell_size, self.offset)
+        sprite = self._get_sprite(direction, frame)
+        screen.blit(sprite, (cx - self.radius, cy - self.radius))
+
+    def _get_sprite(self, direction: Direction, frame: int) -> pygame.Surface:
+        """Return the sprite of a look, drawing it the first time.
+
+        Args:
+            direction: Direction Pac-Man faces, as (dx, dy).
+            frame: Mouth opening, from 0 (closed) to
+                ``MOUTH_FRAMES - 1`` (fully open).
+
+        Returns:
+            The sprite, a square surface of side ``2 * radius + 1``.
+        """
+        key = (direction, frame)
+        if key not in self._sprites:
+            mouth_angle = PACMAN_MOUTH_MAX_ANGLE * frame / (MOUTH_FRAMES - 1)
+            size = 2 * self.radius + 1
+            # SRCALPHA: pixels not drawn stay transparent.
+            sprite = pygame.Surface((size, size), pygame.SRCALPHA)
+            center = (self.radius, self.radius)
+            self._fill_pacman(sprite, center, direction, mouth_angle)
+            self._sprites[key] = sprite
+        return self._sprites[key]
 
     def _fill_pacman(
         self,
