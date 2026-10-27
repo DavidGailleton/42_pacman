@@ -17,8 +17,8 @@ class ViewScores(Layout):
         self.font = pygame.font.Font(None, FONT_SIZE)
 
     def handle_event(self, event: pygame.event.Event) -> Layout | None:
-        if event.key == pygame.KEYDOWN:
-            return
+        if event.type != pygame.KEYDOWN:
+            return None
         if event.key == pygame.K_ESCAPE:
             from src.layouts.main_menu import MainMenu
             return MainMenu(

@@ -26,7 +26,11 @@ class MainMenu(Layout):
                 scores=get_scores(config=self.config)
             )
         elif choice == "Instructions":
-            pass
+            from src.layouts.instructions import Instructions
+            return Instructions(
+                screen_size=self.screen_size,
+                config=self.config
+            )
         elif choice == "Exit":
             pygame.event.post(pygame.event.Event(pygame.QUIT))
         return None
