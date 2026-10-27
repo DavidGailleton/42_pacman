@@ -1,0 +1,13 @@
+# Unknown keys are ignored without any message.
+{
+  "highscore_filename": "highscores.json",
+  "levels": [{"width": 15, "height": 15, "color": "pink"}],
+  "lives": 3,
+  "point_per_pacgum": 10,
+  "point_per_super_pacgum": 50,
+  "point_per_ghost": 200,
+  "seed": 42,
+  "level_max_time": 90,
+  "difficulty": "hard",
+  "ghosts": 12
+}

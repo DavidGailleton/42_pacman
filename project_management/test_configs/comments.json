@@ -1,0 +1,17 @@
+# Full-line comment at the top
+{
+  # Comment before a key
+  "highscore_filename": "highscores.json",
+      # Indented comment
+  "levels": [
+    # Comment inside an array
+    {"width": 15, "height": 15}
+  ],
+  "lives": 3,
+  "point_per_pacgum": 10,
+  "point_per_super_pacgum": 50,
+  "point_per_ghost": 200,
+  "seed": 42,
+  "level_max_time": 90
+}
+# Comment at the end

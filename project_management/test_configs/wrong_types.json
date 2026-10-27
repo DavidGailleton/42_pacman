@@ -1,0 +1,11 @@
+# Every value has the wrong JSON type: each one must fall back to its default.
+{
+  "highscore_filename": 42,
+  "levels": {"width": 15, "height": 15},
+  "lives": "3",
+  "point_per_pacgum": 10.5,
+  "point_per_super_pacgum": null,
+  "point_per_ghost": [200],
+  "seed": true,
+  "level_max_time": "90"
+}
