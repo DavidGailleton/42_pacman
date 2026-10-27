@@ -1,0 +1,23 @@
+# Full playthrough: 10 levels of 15x15 with a short timer.
+# Turn cheat mode on (C) and survive each timer to clear the level.
+{
+  "highscore_filename": "project_management/test_configs/test_highscores.json",
+  "levels": [
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15}
+  ],
+  "lives": 3,
+  "point_per_pacgum": 10,
+  "point_per_super_pacgum": 50,
+  "point_per_ghost": 200,
+  "seed": 42,
+  "level_max_time": 10
+}

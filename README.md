@@ -30,3 +30,12 @@ This creates `release/pac-man-linux.tar.gz`, which contains:
 - `INSTRUCTIONS.txt`: how to play
 
 Only a Linux build is provided, because PyInstaller can't cross-compile.
+
+## Project Management
+
+Project management documents are in [`project_management/`](project_management/):
+
+- [Acceptance test plan](project_management/acceptance_test_plan.md):
+  every test to run before and during the defense, with ready-made
+  config and highscore files in
+  [`project_management/test_configs/`](project_management/test_configs/).

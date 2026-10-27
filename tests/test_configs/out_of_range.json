@@ -1,0 +1,14 @@
+# Values of the right type but outside the allowed range.
+{
+  "highscore_filename": "",
+  "levels": [
+    {"width": 5, "height": 15},
+    {"width": 15, "height": 500}
+  ],
+  "lives": 0,
+  "point_per_pacgum": -10,
+  "point_per_super_pacgum": -50,
+  "point_per_ghost": -200,
+  "seed": 42,
+  "level_max_time": 0
+}

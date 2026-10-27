@@ -1,0 +1,13 @@
+[
+  {"name": "VALID ONE", "score": 900},
+  {"name": "WAY TOO LONG NAME", "score": 5000},
+  {"name": "b@d!", "score": 4000},
+  {"name": "", "score": 3000},
+  {"name": "NEGATIVE", "score": -100},
+  {"name": "FLOAT", "score": 12.5},
+  {"name": "BOOL", "score": true},
+  {"name": "STRING", "score": "800"},
+  {"score": 700},
+  "not an object",
+  {"name": "VALID TWO", "score": 300}
+]
