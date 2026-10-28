@@ -147,7 +147,7 @@ class Config(BaseModel):
                 reason: str = error.errors()[0]["msg"]
                 print(
                     f"Warning: invalid level {index} {entry!r} "
-                    f"({reason}), skipped"
+                    f"({reason}), replace"
                 )
         missing = MIN_LEVEL - len(levels)
         if missing > 0:
