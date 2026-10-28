@@ -38,7 +38,7 @@ class EndScreen(Layout):
 
             return MainMenu(screen_size=self.screen_size, config=self.config)
         if event.key == pygame.K_BACKSPACE:
-            self.name = self.name[-1:]
+            self.name = self.name[:-1]
         elif len(self.name) < MAX_NAME_LENGTH:
             char = self._key_to_char(event.key)
             if char is not None:
