@@ -10,6 +10,7 @@ CONTROLS
   Enter                Select a menu entry
   Esc                  Pause / resume (or go back from a screen)
   C                    Toggle cheat mode (invincible)
+  N                    Skip to the next level (cheat mode only)
 
 RULES
   Eat every pacgum, or survive until the timer ends, to clear a level.

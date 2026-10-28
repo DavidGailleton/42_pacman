@@ -51,6 +51,7 @@ a clear error message and exits with status 1 (never a traceback).
 | Enter               | Select a menu entry / confirm your name    |
 | Esc                 | Pause / resume (or go back from a screen)  |
 | C                   | Toggle cheat mode (invincible)             |
+| N                   | Skip to the next level (cheat mode only)   |
 
 ### Rules
 
@@ -132,7 +133,7 @@ non-blank character is `#` is ignored (`strip_comments` in
 | Key                      | Type                    | Default             | Valid values                            |
 | ------------------------ | ----------------------- | ------------------- | --------------------------------------- |
 | `highscore_filename`     | string                  | `"highscores.json"` | non-empty path                          |
-| `levels`                 | list of `{width, height}` | 10 levels of 21×21 | at least 1 level; width/height 10 – 100 |
+| `levels`                 | list of `{width, height}` | 10 levels of 21×21 | at least 10 levels; width/height 10 – 100 |
 | `lives`                  | integer                 | `3`                 | 1 – 99                                  |
 | `point_per_pacgum`       | integer                 | `10`                | ≥ 0                                     |
 | `point_per_super_pacgum` | integer                 | `50`                | ≥ 0                                     |
@@ -141,6 +142,9 @@ non-blank character is `#` is ignored (`strip_comments` in
 | `level_max_time`         | integer (seconds)       | `90`                | ≥ 1                                     |
 
 - `levels` are played in order; the game is won after the last one.
+- Each level is checked on its own: an invalid level is replaced by a
+  21×21 level, and if fewer than 10 levels are given, 21×21 levels are
+  added at the end (with a warning).
 - Types are strict: `"3"` or `true` are not accepted where an integer is
   expected.
 - A missing or invalid value is replaced by its default and a warning is
@@ -164,7 +168,7 @@ Example:
   "point_per_pacgum": 10,
   "point_per_super_pacgum": 50,
   "point_per_ghost": 200,
-  # Seed of level 1; level n uses seed + n - 1
+  # Seed of level 1; the next levels are random
   "seed": 42,
   "level_max_time": 90
 }
@@ -208,9 +212,9 @@ used **unmodified**: the only code that talks to it is the adapter class
 - The generator draws a "42" pattern made of closed cells (4 walls).
   These cells get no pacgum, and Pac-Man starts on the open cell nearest
   to the maze center.
-- Seeds: level 1 uses `seed`, level *n* uses `seed + n - 1`, so every
-  level is reproducible. A seed ≤ 0 makes the generator pick a random
-  maze.
+- Seeds: level 1 uses `seed`, so it is always the same maze. The next
+  levels use seed `0`, which makes the generator pick a random maze, so
+  they change every game. A `seed` ≤ 0 makes level 1 random too.
 
 ## Implementation
 
@@ -238,7 +242,8 @@ used **unmodified**: the only code that talks to it is the adapter class
 - **Pacgums** (`src/models/pacgum.py`): one pacgum on every open cell,
   a super-pacgum in each corner. The score only ever increases.
 - **Cheat mode**: `C` makes Pac-Man invincible; "CHEAT MODE" is shown in
-  red in the HUD.
+  red in the HUD. While it is on, `N` skips to the next level (after the
+  last one, the game is won).
 - **Error handling**: config and highscore errors are handled where they
   happen; `main()` in `src/__main__.py` also catches any remaining
   exception and prints it, so no traceback ever reaches the player.
