@@ -60,7 +60,7 @@ class Game(Layout):
         self.time_left: float = config.level_max_time
         self.maze = Maze(
             shape=(level.width, level.height),
-            seed=config.seed + self.level - 1,
+            seed=config.seed if self.level == 1 else 0,
         )
         self.pacgum = Pacgum(maze=self.maze, config=config)
         self.maze_renderer = MazeRenderer(
