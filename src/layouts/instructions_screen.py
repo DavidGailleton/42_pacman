@@ -13,6 +13,7 @@ INSTRUCTIONS: list[str] = [
     "SUPER-PACGUMS (CORNERS) MAKE GHOSTS EDIBLE",
     "ESC: PAUSE",
     "C: CHEAT MODE (INVINCIBLE)",
+    "WHEN IN CHEAT MODE > N: NEXT LEVEL"
 ]
 
 # Vertical pixel space between two lines of text.

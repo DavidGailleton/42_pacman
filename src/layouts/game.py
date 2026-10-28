@@ -102,6 +102,11 @@ class Game(Layout):
             if event.key == pygame.K_c:
                 self.cheat_mode = not self.cheat_mode
                 return self
+            if event.key == pygame.K_n:
+                if self.cheat_mode:
+                    self._next_level()
+                return self
+
             self._handle_key(event.key)
         return self
 
