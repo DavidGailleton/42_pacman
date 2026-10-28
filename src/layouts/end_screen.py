@@ -9,6 +9,11 @@ CURSOR_BLINK_TIME = 0.5
 
 
 class EndScreen(Layout):
+    """Game over or victory screen, where the player types a name.
+
+    The final score is shown and saved in the highscores when Enter is
+    pressed, then the main menu is shown again.
+    """
     def __init__(
         self,
         config: Config,
@@ -16,6 +21,14 @@ class EndScreen(Layout):
         score: int,
         win: bool,
     ) -> None:
+        """Prepare the screen for the given final score.
+
+        Args:
+            config: Game configuration, used to save the highscore.
+            screen_size: Screen size in pixels, as (width, height).
+            score: Final score of the game.
+            win: True for the victory screen, False for game over.
+        """
         self.config = config
         self.screen_size = screen_size
         self.score = score
@@ -27,6 +40,14 @@ class EndScreen(Layout):
         self.font = pygame.font.Font(None, 64)
 
     def handle_event(self, event: pygame.event.Event) -> Layout | None:
+        """Edit the player name, or save the score on Enter.
+
+        Args:
+            event: Pygame event to react to.
+
+        Returns:
+            The main menu once the name is confirmed, else None.
+        """
         if event.type != pygame.KEYDOWN:
             return None
         if event.key == pygame.K_RETURN:
@@ -46,6 +67,14 @@ class EndScreen(Layout):
         return None
 
     def update(self, dt: float) -> Layout | None:
+        """Make the text cursor blink.
+
+        Args:
+            dt: Seconds since the last frame.
+
+        Returns:
+            Always None: the screen only changes on a key press.
+        """
         self.cursor_timer += dt
         if self.cursor_timer >= CURSOR_BLINK_TIME:
             self.cursor_timer = 0.0
@@ -53,6 +82,11 @@ class EndScreen(Layout):
         return None
 
     def draw(self, screen: pygame.Surface) -> None:
+        """Draw the title, the final score and the name being typed.
+
+        Args:
+            screen: Surface to draw on.
+        """
         screen.fill(BLACK_COLOR)
         center_x = self.screen_size[0] // 2
         if self.win:

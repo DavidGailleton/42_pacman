@@ -123,6 +123,19 @@ class Config(BaseModel):
     @field_validator("levels", mode="before")
     @classmethod
     def _complete_levels(cls, value: Any) -> Any:
+        """Check each level on its own and complete the list to MIN_LEVEL.
+
+        An invalid level is replaced by a default 21x21 level instead of
+        dropping the whole list. Default levels are then added at the end
+        until there are MIN_LEVEL levels.
+
+        Args:
+            value: Raw ``levels`` value read from the config file.
+
+        Returns:
+            The checked and completed list, or the raw value if it is not
+            a list (the generic fallback then uses the default levels).
+        """
         if not isinstance(value, list):
             return value
         levels: list[LevelConfig] = []

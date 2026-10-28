@@ -6,7 +6,17 @@ import pygame
 
 
 class App:
+    """Main application: owns the window and runs the game loop.
+
+    The current screen is a ``Layout``. Each frame, it receives the events,
+    is updated and drawn, and can hand over to another layout.
+    """
     def __init__(self, config: Config) -> None:
+        """Open the window and show the main menu.
+
+        Args:
+            config: Validated game configuration.
+        """
         pygame.init()
         self.screen = pygame.display.set_mode((WIDTH_SIZE, HEIGHT_SIZE))
         self.clock = pygame.time.Clock()
@@ -16,6 +26,11 @@ class App:
         )
 
     def run(self) -> None:
+        """Run the game loop at a fixed frame rate until the app is closed.
+
+        The loop stops when the window is closed or when the current layout
+        becomes None.
+        """
         while self.layout is not None:
             self.clock.tick(FPS)
             for event in pygame.event.get():

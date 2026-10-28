@@ -5,7 +5,14 @@ import math
 
 
 class HudRenderer:
+    """Draws the score, lives, level and timer above the maze."""
     def __init__(self, maze: Maze, screen_size: tuple[int, int]) -> None:
+        """Load the HUD font.
+
+        Args:
+            maze: Maze of the current level.
+            screen_size: Screen size in pixels, as (width, height).
+        """
         self.cell_size = maze.get_shape()
         self.screen_size = screen_size
         self.font = pygame.font.Font(None, 48)

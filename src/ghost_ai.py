@@ -95,6 +95,10 @@ class Ghost(ABC):
         """
 
     def reset(self) -> None:
+        """Put the ghost back in its corner, in chase mode.
+
+        Used when Pac-Man loses a life.
+        """
         self.position = self.corner
         self.direction = None
         self.step = 0

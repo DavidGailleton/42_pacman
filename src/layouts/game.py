@@ -36,7 +36,18 @@ KEY_TO_DIRECTION: dict[int, Direction] = {
 
 
 class Game(Layout):
+    """Game screen: maze, Pac-Man, ghosts, pacgums and HUD.
+
+    Keeps the score, lives and level for the whole game and loads a new
+    maze for each level.
+    """
     def __init__(self, config: Config, screen_size: tuple[int, int]) -> None:
+        """Start a new game on the first level.
+
+        Args:
+            config: Game configuration (levels, lives, points, timer).
+            screen_size: Screen size in pixels, as (width, height).
+        """
         # Kept for the whole game: never reset between levels.
         self.config = config
         self.screen_size = screen_size
@@ -96,6 +107,17 @@ class Game(Layout):
         self._load_level()
 
     def handle_event(self, event: pygame.event.Event) -> Layout | None:
+        """React to a key press.
+
+        Esc opens the pause menu, C toggles the cheat mode, N skips the
+        level when the cheat mode is on, and the other keys move Pac-Man.
+
+        Args:
+            event: Pygame event to react to.
+
+        Returns:
+            The pause menu on Esc, else this game.
+        """
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_ESCAPE:
                 return PauseMenu(game=self)
@@ -111,12 +133,25 @@ class Game(Layout):
         return self
 
     def update(self, dt: float) -> Layout | None:
+        """Advance the game by one frame.
+
+        Args:
+            dt: Seconds since the last frame.
+
+        Returns:
+            The end screen once the game is over, else this game.
+        """
         tmp = self._update(dt)
         if tmp is not None:
             return tmp
         return self
 
     def draw(self, screen: pygame.Surface) -> None:
+        """Draw the maze, the pacgums, Pac-Man, the ghosts and the HUD.
+
+        Args:
+            screen: Surface to draw on.
+        """
         self.maze_renderer.draw(screen=screen)
         self.pacgum_renderer.draw(screen=screen)
         self.pacman_renderer.draw(
@@ -246,6 +281,11 @@ class Game(Layout):
                 return
 
     def _lose_life(self) -> None:
+        """Remove a life after a ghost caught Pac-Man.
+
+        With no life left the game is over. Otherwise everyone goes back to
+        the start position and the game freezes a moment.
+        """
         self.lives -= 1
         if self.lives == 0:
             self.game_over = True
@@ -254,6 +294,10 @@ class Game(Layout):
         self.freeze_timer = EAT_FREEZE_TIME
 
     def _reset_position(self) -> None:
+        """Put Pac-Man back at the start cell and the ghosts in their corners.
+
+        The pacgums, the score and the timer are kept.
+        """
         self.pacman_cell = self._find_start_cell()
         self.pacman_step = 0
         self.current_move = None
