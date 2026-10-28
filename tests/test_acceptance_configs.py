@@ -11,7 +11,7 @@ import pytest
 
 from src.__main__ import main
 from src.config_loader import ConfigError, load_config
-from src.models.config import DEFAULT_LEVELS, Config
+from src.models.config import MIN_LEVEL, Config
 from src.score_management import Score, get_scores
 from src.utils.maze import Maze
 
@@ -26,7 +26,7 @@ INVALID_JSON_FILES: list[str] = ["invalid_json.json", "empty.json"]
 FAULTY_FILES: list[tuple[str, str, int]] = [
     ("not_object.json", "config root must be a JSON object", 1),
     ("wrong_types.json", "invalid value", 8),
-    ("out_of_range.json", "invalid value", 7),
+    ("out_of_range.json", "invalid value", 6),
     ("empty_levels.json", "missing key", 7),
 ]
 
@@ -88,10 +88,22 @@ def test_faulty_config_falls_back(
     config: Config = load_config(str(TEST_CONFIGS / name))
     output: str = capsys.readouterr().out
     assert output.count(warning) == count
-    assert config.levels == DEFAULT_LEVELS
+    assert len(config.levels) == MIN_LEVEL
     assert config.lives == 3
     assert config.point_per_pacgum == 10
     assert config.highscore_filename == "highscores.json"
+
+
+def test_out_of_range_levels_are_replaced(
+    capsys: pytest.CaptureFixture[str],
+) -> None:
+    """Only the invalid levels are replaced, the valid ones are kept."""
+    config: Config = load_config(str(TEST_CONFIGS / "out_of_range.json"))
+    output: str = capsys.readouterr().out
+    assert output.count("invalid level") == 2
+    assert [(level.width, level.height) for level in config.levels] == (
+        [(21, 21)] + [(15, 15)] * 8 + [(21, 21)]
+    )
 
 
 @pytest.mark.parametrize("name", VALID_FILES)
@@ -104,7 +116,7 @@ def test_valid_config_loads_silently(
     assert config.lives == 3
     assert [(level.width, level.height) for level in config.levels] == [
         (15, 15)
-    ]
+    ] * 10
 
 
 def test_full_run_config() -> None:
@@ -114,7 +126,7 @@ def test_full_run_config() -> None:
     assert config.level_max_time == 10
     for number, level in enumerate(config.levels, start=1):
         assert (level.width, level.height) == (15, 15)
-        Maze((level.width, level.height), config.seed + number - 1)
+        Maze((level.width, level.height), config.seed if number == 1 else 0)
 
 
 @pytest.mark.parametrize("name, expected, warning", HIGHSCORE_FILES)

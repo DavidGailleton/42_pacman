@@ -3,6 +3,14 @@
   "highscore_filename": "",
   "levels": [
     {"width": 5, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
     {"width": 15, "height": 500}
   ],
   "lives": 0,

@@ -1,7 +1,18 @@
 # Unknown keys are ignored without any message.
 {
   "highscore_filename": "highscores.json",
-  "levels": [{"width": 15, "height": 15, "color": "pink"}],
+  "levels": [
+    {"width": 15, "height": 15, "color": "pink"},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15},
+    {"width": 15, "height": 15}
+  ],
   "lives": 3,
   "point_per_pacgum": 10,
   "point_per_super_pacgum": 50,

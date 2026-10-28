@@ -9,7 +9,7 @@ import pygame  # noqa: E402
 
 from src.layouts.end_screen import EndScreen  # noqa: E402
 from src.layouts.game import Game  # noqa: E402
-from src.models.config import Config, LevelConfig  # noqa: E402
+from src.models.config import MIN_LEVEL, Config, LevelConfig  # noqa: E402
 from src.utils.maze import Maze  # noqa: E402
 
 SCREEN_SIZE = (800, 600)
@@ -71,31 +71,32 @@ def test_last_life_lost_loses_game() -> None:
     assert not screen.win
 
 
-def test_next_level_uses_its_size_and_seed() -> None:
-    """Level 2 uses the second size of the list and the seed plus 1."""
+def test_first_level_uses_config_seed() -> None:
+    """Level 1 is always the maze of the config seed."""
+    config = Config()
+    game = make_game(config)
+    level = config.levels[0]
+    expected = Maze((level.width, level.height), config.seed).get_maze()
+    assert game.maze.get_maze() == expected
+
+
+def test_next_level_uses_its_size() -> None:
+    """Level 2 uses the second size of the list (with a random maze)."""
     config = Config(
-        levels=[
-            LevelConfig(width=10, height=10),
-            LevelConfig(width=14, height=12),
-        ]
+        levels=[LevelConfig(width=10, height=10)]
+        + [LevelConfig(width=14, height=12)] * (MIN_LEVEL - 1)
     )
     game = make_game(config)
     game._next_level()
     assert game.maze.get_shape() == (14, 12)
-    expected = Maze((14, 12), config.seed + 1).get_maze()
-    assert game.maze.get_maze() == expected
 
 
 def test_level_count_comes_from_config() -> None:
-    """With two levels in the config, winning level 2 wins the game."""
-    config = Config(
-        levels=[
-            LevelConfig(width=10, height=10),
-            LevelConfig(width=10, height=10),
-        ]
-    )
+    """Winning the last level of the config wins the game."""
+    config = Config(levels=[LevelConfig(width=10, height=10)] * 12)
     game = make_game(config)
-    game._next_level()
-    assert not game.won
+    for _ in range(11):
+        game._next_level()
+        assert not game.won
     game._next_level()
     assert game.won
