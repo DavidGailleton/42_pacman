@@ -9,40 +9,12 @@
       "height": 15
     },
     {
-      "width": 12,
+      "width": 5,
       "height": 10
     },
     {
       "width": 20,
       "height": 14
-    },
-    {
-      "width": 10,
-      "height": 10
-    },
-    {
-      "width": 25,
-      "height": 15
-    },
-    {
-      "width": 18,
-      "height": 18
-    },
-    {
-      "width": 30,
-      "height": 20
-    },
-    {
-      "width": 14,
-      "height": 22
-    },
-    {
-      "width": 21,
-      "height": 21
-    },
-    {
-      "width": 28,
-      "height": 16
     }
   ],
   # Number of lives at the start of the game

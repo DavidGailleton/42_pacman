@@ -19,6 +19,9 @@ from pydantic import (
 MazeSide = Annotated[StrictInt, Field(ge=10, le=100)]
 
 
+MIN_LEVEL = 10
+
+
 class LevelConfig(BaseModel):
     """Maze size of one level, in cells.
 
@@ -32,7 +35,7 @@ class LevelConfig(BaseModel):
 # Used when 'levels' is missing or invalid: 10 levels, as the subject
 # asks for at least 10.
 DEFAULT_LEVELS: list[LevelConfig] = [
-    LevelConfig(width=21, height=21) for _ in range(10)
+    LevelConfig(width=21, height=21) for _ in range(MIN_LEVEL)
 ]
 
 
@@ -52,7 +55,8 @@ class Config(BaseModel):
         default="highscores.json", min_length=1
     )
     # One entry per level, played in order. Never empty.
-    levels: list[LevelConfig] = Field(default=DEFAULT_LEVELS, min_length=10)
+    levels: list[LevelConfig] = Field(default=DEFAULT_LEVELS,
+                                      min_length=MIN_LEVEL)
     lives: StrictInt = Field(default=3, ge=1, le=99)
     point_per_pacgum: StrictInt = Field(default=10, ge=0)
     point_per_super_pacgum: StrictInt = Field(default=50, ge=0)
@@ -115,3 +119,28 @@ class Config(BaseModel):
                 f"({reason}), using default {default!r}"
             )
             return default
+
+    @field_validator("levels", mode="before")
+    @classmethod
+    def _complete_levels(cls, value: Any) -> Any:
+        if not isinstance(value, list):
+            return value
+        levels: list[LevelConfig] = []
+        for index, entry in enumerate(value, start=1):
+            try:
+                levels.append(LevelConfig.model_validate(entry))
+            except ValidationError as error:
+                levels.append(DEFAULT_LEVELS[0])
+                reason: str = error.errors()[0]["msg"]
+                print(
+                    f"Warning: invalid level {index} {entry!r} "
+                    f"({reason}), skipped"
+                )
+        missing = MIN_LEVEL - len(levels)
+        if missing > 0:
+            levels.extend(DEFAULT_LEVELS[len(levels):])
+            print(
+                f"Warning: You need {MIN_LEVEL} levels. "
+                f"Missing {missing} levels"
+            )
+        return levels
