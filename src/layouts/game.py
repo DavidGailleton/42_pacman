@@ -62,8 +62,9 @@ class Game(Layout):
     def _load_level(self) -> None:
         """Build a new maze and put everything at its start position.
 
-        Level n uses the size of the n-th entry of ``levels`` and the
-        config seed plus n - 1, so every level can be replayed.
+        Level n uses the size of the n-th entry of ``levels``. Level 1
+        uses the config seed (always the same maze), the next levels use
+        seed 0 so the generator gives a random maze every game.
         Score and lives are not touched: they carry over.
         """
         config = self.config
