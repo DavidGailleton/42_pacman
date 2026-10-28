@@ -4,6 +4,7 @@ from src.utils.maze import Maze
 
 class Pacgum:
     def __init__(self, maze: Maze, config: Config) -> None:
+        self.maze = maze
         self.points = config.point_per_pacgum
         self.super_point = config.point_per_super_pacgum
         self.super_pacgum = self._place_corner(maze)
@@ -16,12 +17,14 @@ class Pacgum:
     def _place_pacgum(self, maze: Maze) -> set[tuple[int, int]]:
         cols, rows = maze.get_shape()
         pacgum: set[tuple[int, int]] = set()
+        center_pos = self._find_start_cell()
 
         for x in range(cols):
             for y in range(rows):
                 if (
                     not maze.is_closed((x, y))
                     and (x, y) not in self.super_pacgum
+                    and (x, y) != center_pos
                 ):
                     pacgum.add((x, y))
         return pacgum
@@ -43,3 +46,24 @@ class Pacgum:
 
     def get_super_pacgum(self) -> set[tuple[int, int]]:
         return self.super_pacgum
+
+    def _find_start_cell(self) -> tuple[int, int]:
+        """Find the cell closest to the maze center that can be entered.
+
+        The center may be a closed cell (four walls, e.g. in the "42"
+        pattern). Cells are sorted by Manhattan distance to the center
+        and the first one that is not closed is used.
+
+        Returns:
+            The start cell (x, y), or (0, 0) if every cell is closed.
+        """
+        width, height = self.maze.get_shape()
+        center_x, center_y = width // 2, height // 2
+        cells = [(x, y) for y in range(height) for x in range(width)]
+        cells.sort(
+            key=lambda cell: abs(cell[0] - center_x) + abs(cell[1] - center_y)
+        )
+        for cell in cells:
+            if not self.maze.is_closed(cell):
+                return cell
+        return (0, 0)
