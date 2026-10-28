@@ -52,7 +52,7 @@ class Config(BaseModel):
         default="highscores.json", min_length=1
     )
     # One entry per level, played in order. Never empty.
-    levels: list[LevelConfig] = Field(default=DEFAULT_LEVELS, min_length=1)
+    levels: list[LevelConfig] = Field(default=DEFAULT_LEVELS, min_length=10)
     lives: StrictInt = Field(default=3, ge=1, le=99)
     point_per_pacgum: StrictInt = Field(default=10, ge=0)
     point_per_super_pacgum: StrictInt = Field(default=50, ge=0)

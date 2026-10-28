@@ -1,6 +1,6 @@
 PYTHON = uv run python
 MAIN = -m src
-ARGS =
+ARGS = config.json
 
 .PHONY: unzip_maze install run debug clean lint lint-strict test package
 
@@ -14,7 +14,7 @@ run:
 	$(PYTHON) $(MAIN) $(ARGS)
 
 debug:
-	$(PYTHON) -m pdb $(MAIN)
+	$(PYTHON) -m pdb $(MAIN) $(ARGS)
 
 clean:
 	find . -type d -name "__pycache__" -exec rm -rf {} +
