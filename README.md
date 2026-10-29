@@ -96,7 +96,7 @@ This creates `release/pac-man-linux.tar.gz`, which contains:
 
 Only a Linux build is provided, because PyInstaller can't cross-compile.
 
-Published build: `<itch.io link>`
+Published build: [https://davidgailleton.itch.io/42-pacman](https://davidgailleton.itch.io/42-pacman)
 
 ## Resources
 
