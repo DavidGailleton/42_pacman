@@ -225,3 +225,5 @@ release/
 
 # Highscore file written by the acceptance tests
 project_management/test_configs/test_highscores.json
+
+highscores.json
